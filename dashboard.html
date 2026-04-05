@@ -12,18 +12,23 @@
         body { font-family: 'Kanit', sans-serif; background: #f8fafc; }
         .menu-active { background: #10b981; color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
         .glass-card { background: white; border-radius: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
-        .toast-enter-active, .toast-leave-active { transition: all 0.5s ease; }
-        .toast-enter-from, .toast-leave-to { opacity: 0; transform: translateY(-30px); }
+        
+        /* Modal Popup Animation */
+        .modal-enter-active, .modal-leave-active { transition: opacity 0.3s ease; }
+        .modal-enter-from, .modal-leave-to { opacity: 0; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden text-gray-800">
 
     <div id="app" class="flex w-full h-full relative">
         
-        <transition name="toast">
-            <div v-if="toast.show" :class="toast.type === 'error' ? 'bg-red-500' : 'bg-emerald-500'" class="fixed top-8 left-1/2 transform -translate-x-1/2 z-50 text-white px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 font-bold">
-                <i :class="toast.type === 'error' ? 'fas fa-exclamation-circle' : 'fas fa-check-circle'"></i>
-                {{ toast.msg }}
+        <transition name="modal">
+            <div v-if="toast.show" class="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/40 backdrop-blur-sm">
+                <div :class="toast.type === 'error' ? 'border-t-8 border-red-500' : 'border-t-8 border-emerald-500'" class="bg-white px-10 py-10 rounded-3xl shadow-2xl flex flex-col items-center max-w-sm w-full mx-4 animate__animated animate__zoomIn">
+                    <i :class="toast.type === 'error' ? 'fas fa-times-circle text-red-500' : 'fas fa-check-circle text-emerald-500'" class="text-7xl mb-4"></i>
+                    <h2 class="text-2xl font-bold text-gray-800 text-center leading-tight">{{ toast.msg }}</h2>
+                    <button @click="toast.show = false" class="mt-8 px-8 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-all w-full">ปิดหน้าต่าง</button>
+                </div>
             </div>
         </transition>
 
@@ -46,8 +51,8 @@
                 <button @click="changeView('manage')" :class="{'menu-active': view === 'manage', 'text-gray-500 hover:bg-emerald-50': view !== 'manage'}" class="w-full flex items-center p-4 rounded-2xl font-medium transition-all">
                     <i class="fas fa-edit w-6 text-center mr-2"></i> จัดการข้อมูล
                 </button>
-                <button @click="view = 'report'" :class="{'menu-active': view === 'report', 'text-gray-500 hover:bg-emerald-50': view !== 'report'}" class="w-full flex items-center p-4 rounded-2xl font-medium transition-all">
-                    <i class="fas fa-chart-line w-6 text-center mr-2"></i> รายงานภาพรวม
+                <button @click="changeView('report')" :class="{'menu-active': view === 'report', 'text-gray-500 hover:bg-emerald-50': view !== 'report'}" class="w-full flex items-center p-4 rounded-2xl font-medium transition-all">
+                    <i class="fas fa-chart-pie w-6 text-center mr-2"></i> รายงานภาพรวม
                 </button>
             </nav>
         </aside>
@@ -94,21 +99,26 @@
 
             <div v-if="view === 'save'" class="grid grid-cols-1 md:grid-cols-2 gap-8 animate__animated animate__fadeIn">
                 <div class="glass-card p-10">
-                    <label class="block text-gray-500 mb-2">รหัสนักเรียน (อ้างอิงชั้น {{ selectedClass }})</label>
-                    <div class="relative mb-6">
-                        <input v-model="saveId" @keyup.enter="getStudent('save')" type="text" placeholder="สแกน หรือ กรอกรหัสนักเรียน..." class="w-full pl-12 p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-400">
-                        <i class="fas fa-search absolute left-4 top-5 text-gray-400"></i>
+                    <label class="block text-gray-500 mb-2 font-bold">ค้นหานักเรียน (อ้างอิงชั้น {{ selectedClass }})</label>
+                    <div class="relative">
+                        <input v-model="saveId" @keyup.enter="getStudent('save')" type="text" placeholder="กรอกรหัสนักเรียน..." class="w-full pl-5 p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-400 text-lg border border-gray-200">
                     </div>
-                    <div v-if="saveInfo" class="space-y-6">
-                        <div class="bg-emerald-50 p-6 rounded-2xl border border-emerald-100 flex justify-between items-center">
-                            <div>
-                                <h3 class="text-xl font-bold text-emerald-800">{{ saveInfo.name }}</h3>
-                                <p class="text-emerald-600">ชั้น: {{ saveInfo.class }} | ยอดเดิม: ฿ {{ saveInfo.balance.toLocaleString() }}</p>
-                            </div>
+                    
+                    <button @click="getStudent('save')" :disabled="loadingSearch" class="mt-4 w-full py-4 bg-emerald-50 text-emerald-600 rounded-2xl font-bold hover:bg-emerald-100 transition-all border border-emerald-200">
+                        <span v-if="!loadingSearch"><i class="fas fa-search mr-2"></i> ค้นหาข้อมูลนักเรียน</span>
+                        <span v-else><i class="fas fa-spinner fa-spin mr-2"></i> กำลังโหลดเงินออมทรัพย์นักเรียน...</span>
+                    </button>
+
+                    <div v-if="saveInfo" class="mt-6 space-y-6">
+                        <div class="bg-emerald-600 text-white p-6 rounded-2xl shadow-lg">
+                            <p class="text-sm opacity-80 mb-1">ข้อมูลผู้ฝาก ({{ saveInfo.class }})</p>
+                            <h3 class="text-2xl font-bold">{{ saveInfo.name }}</h3>
+                            <p class="mt-2 text-emerald-100">ยอดสะสมเดิม: <span class="font-bold text-xl text-white">฿ {{ saveInfo.balance.toLocaleString() }}</span></p>
                         </div>
-                        <input v-model.number="saveAmount" type="number" placeholder="จำนวนเงินวันนี้ (บาท)" class="w-full p-4 bg-white border-2 border-emerald-100 rounded-2xl outline-none text-2xl font-bold text-center text-emerald-600">
-                        <button @click="submitTransaction('save')" :disabled="loadingSave" class="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold hover:bg-emerald-700 shadow-lg">
-                            <span v-if="!loadingSave">บันทึกยอดเงิน</span><span v-else><i class="fas fa-spinner fa-spin"></i> กำลังบันทึก</span>
+                        <input v-model.number="saveAmount" type="number" placeholder="ระบุจำนวนเงินวันนี้ (บาท)" class="w-full p-4 bg-white border-2 border-emerald-200 rounded-2xl outline-none text-3xl font-bold text-center text-emerald-600 focus:border-emerald-500">
+                        <button @click="submitTransaction('save')" :disabled="loadingSave" class="w-full py-5 bg-emerald-600 text-white rounded-2xl font-bold text-xl hover:bg-emerald-700 shadow-xl transform active:scale-95 transition-all">
+                            <span v-if="!loadingSave"><i class="fas fa-piggy-bank mr-2"></i> บันทึกยอดเงิน</span>
+                            <span v-else><i class="fas fa-spinner fa-spin"></i> กำลังบันทึก</span>
                         </button>
                     </div>
                 </div>
@@ -121,6 +131,7 @@
                         <i class="fas fa-check-circle text-8xl text-yellow-400 mb-6 animate__animated animate__bounce"></i>
                         <h2 class="text-3xl font-bold mb-2">ออมเงินสำเร็จ!</h2>
                         <p class="text-5xl font-bold mt-4">฿ {{ newBalance.toLocaleString() }}</p>
+                        <p class="text-emerald-300 mt-2">ยอดเงินรวมล่าสุด</p>
                     </div>
                 </div>
             </div>
@@ -152,7 +163,7 @@
                     </table>
                 </div>
                 <div class="flex gap-4 items-end">
-                    <input v-if="deductMode === 'single'" v-model="deductId" type="text" placeholder="รหัสนักเรียน" class="flex-1 p-4 bg-gray-50 rounded-xl outline-none border">
+                    <input v-if="deductMode === 'single'" v-model="deductId" type="text" placeholder="รหัสนักเรียน" class="flex-1 p-4 bg-gray-50 rounded-xl outline-none border border-gray-200">
                     <input v-model.number="deductAmount" type="number" placeholder="จำนวนเงินหัก (บาท)" class="w-1/3 p-4 bg-white border-2 border-red-200 text-2xl font-bold text-center text-red-500 rounded-xl focus:border-red-400">
                     <button @click="submitTransaction('deduct')" :disabled="loadingDeduct" class="px-8 py-4 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600">
                         <span v-if="!loadingDeduct">หักเงิน</span><span v-else><i class="fas fa-spinner fa-spin"></i></span>
@@ -161,16 +172,21 @@
             </div>
 
             <div v-if="view === 'myMoney'" class="max-w-3xl mx-auto glass-card p-10 shadow-2xl border border-gray-100 animate__animated animate__fadeIn">
-                <h3 class="text-center font-bold text-3xl mb-10 text-gray-700">🔍 ค้นหายอดเงินสะสม (Student View)</h3>
-                <div class="flex gap-4 mb-10 relative">
-                    <input v-model="myMoneyId" @keyup.enter="getStudent('myMoney')" type="text" placeholder="กรอกรหัสนักเรียนเพื่อค้นหา..." class="flex-1 p-5 bg-gray-50 rounded-2xl outline-none focus:ring-4 focus:ring-emerald-100 text-xl border">
-                    <button @click="getStudent('myMoney')" class="px-8 py-5 bg-emerald-600 text-white rounded-2xl font-bold text-xl hover:bg-emerald-700"><i class="fas fa-search mr-2"></i> ค้นหา</button>
+                <h3 class="text-center font-bold text-3xl mb-8 text-gray-700">🔍 ค้นหายอดเงินสะสม (Student View)</h3>
+                <div class="relative mb-4">
+                    <input v-model="myMoneyId" @keyup.enter="getStudent('myMoney')" type="text" placeholder="กรอกรหัสนักเรียนเพื่อค้นหา..." class="w-full p-5 bg-gray-50 rounded-2xl outline-none focus:ring-4 focus:ring-emerald-100 text-xl border">
                 </div>
+                <button @click="getStudent('myMoney')" :disabled="loadingSearch" class="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold text-xl hover:bg-emerald-700 transition-all shadow-lg mb-8">
+                    <span v-if="!loadingSearch"><i class="fas fa-search mr-2"></i> ค้นหาเงินออมของฉัน</span>
+                    <span v-else><i class="fas fa-spinner fa-spin mr-2"></i> กำลังโหลดข้อมูล...</span>
+                </button>
+
                 <transition name="fade" enter-active-class="animate__animated animate__fadeInUp">
-                    <div v-if="myMoneyInfo" class="bg-gradient-to-br from-emerald-50 to-emerald-100 p-10 rounded-[2.5rem] border border-emerald-200 relative overflow-hidden text-center shadow-lg">
-                        <p class="text-emerald-700 font-bold mb-1">ยินดีด้วย! นักเรียนมีเงินออมรวม</p>
-                        <h2 class="text-6xl font-extrabold text-emerald-800 my-4">฿ {{ myMoneyInfo.balance.toLocaleString() }}</h2>
-                        <p class="text-xl font-medium text-emerald-700 mt-2">{{ myMoneyInfo.name }} ({{ myMoneyInfo.class }})</p>
+                    <div v-if="myMoneyInfo" class="bg-gradient-to-br from-emerald-500 to-teal-600 text-white p-10 rounded-[2.5rem] border border-emerald-400 relative overflow-hidden text-center shadow-xl">
+                        <p class="text-emerald-100 font-bold mb-2 text-lg">ยอดเงินออมรวมปัจจุบัน</p>
+                        <h2 class="text-7xl font-extrabold my-6 drop-shadow-md">฿ {{ myMoneyInfo.balance.toLocaleString() }}</h2>
+                        <p class="text-2xl font-medium mt-2">{{ myMoneyInfo.name }}</p>
+                        <p class="text-emerald-200 mt-1">ระดับชั้น: {{ myMoneyInfo.class }}</p>
                     </div>
                 </transition>
             </div>
@@ -215,27 +231,49 @@
             </div>
 
             <div v-if="view === 'report'" class="animate__animated animate__fadeIn space-y-6">
-                <div class="grid grid-cols-3 gap-6">
-                    <div class="glass-card p-6 bg-gradient-to-br from-emerald-500 to-emerald-700 text-white shadow-lg">
-                        <p class="opacity-80">เงินออมรวม (เฉพาะชั้น {{ selectedClass }})</p>
-                        <h2 class="text-4xl font-bold mt-2">฿ 45,200</h2>
+                <div class="glass-card p-6 flex flex-wrap gap-4 items-end bg-gradient-to-r from-emerald-50 to-white">
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1 font-bold">เลือกเดือน</label>
+                        <select v-model="reportMonth" @change="fetchReport" class="p-3 px-6 bg-white rounded-xl border border-gray-200 outline-none text-gray-700 font-bold">
+                            <option v-for="m in monthList" :value="m.val">{{ m.text }}</option>
+                        </select>
                     </div>
-                    <div class="glass-card p-6 bg-white border border-emerald-100 shadow-sm">
-                        <p class="text-gray-500">เงินฝากรวมเดือนนี้</p>
-                        <h2 class="text-3xl font-bold text-emerald-600 mt-2">฿ 12,500</h2>
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1 font-bold">เลือกปี</label>
+                        <select v-model="reportYear" @change="fetchReport" class="p-3 px-6 bg-white rounded-xl border border-gray-200 outline-none text-gray-700 font-bold">
+                            <option v-for="y in yearList" :value="y.ce">{{ y.be }}</option>
+                        </select>
                     </div>
-                    <div class="glass-card p-6 bg-white border border-red-100 shadow-sm">
-                        <p class="text-gray-500">ยอดหักเงินรวมเดือนนี้</p>
-                        <h2 class="text-3xl font-bold text-red-500 mt-2">฿ 2,300</h2>
+                    <div class="flex-1 text-right">
+                        <button class="bg-gray-800 text-white px-6 py-3 rounded-xl font-bold hover:bg-gray-900 transition-all shadow-lg"><i class="fas fa-file-pdf mr-2"></i> ส่งออก PDF รายเดือน</button>
                     </div>
                 </div>
-                <div class="glass-card p-8">
-                    <h3 class="font-bold text-xl text-gray-700 mb-6">ประวัติออมรายเดือน (ตัวอย่าง UI)</h3>
-                    <div class="h-48 flex items-end gap-4 border-b border-gray-200 pb-2">
-                        <div class="flex-1 flex flex-col justify-end items-center group"><div class="w-12 bg-emerald-200 rounded-t-lg" style="height: 40%;"></div><span class="text-xs mt-2 text-gray-400">ม.ค.</span></div>
-                        <div class="flex-1 flex flex-col justify-end items-center group"><div class="w-12 bg-emerald-200 rounded-t-lg" style="height: 60%;"></div><span class="text-xs mt-2 text-gray-400">ก.พ.</span></div>
-                        <div class="flex-1 flex flex-col justify-end items-center group"><div class="w-12 bg-emerald-200 rounded-t-lg" style="height: 50%;"></div><span class="text-xs mt-2 text-gray-400">มี.ค.</span></div>
-                        <div class="flex-1 flex flex-col justify-end items-center group"><div class="w-12 bg-emerald-500 rounded-t-lg shadow-lg" style="height: 90%;"></div><span class="text-xs mt-2 text-gray-800 font-bold">เม.ย.</span></div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+                    <div v-if="loadingReport" class="absolute inset-0 bg-white/50 backdrop-blur-sm z-10 flex items-center justify-center rounded-2xl">
+                        <i class="fas fa-spinner fa-spin text-4xl text-emerald-500"></i>
+                    </div>
+
+                    <div class="glass-card p-8 bg-white border-l-8 border-emerald-500 shadow-sm relative overflow-hidden">
+                        <div class="relative z-10">
+                            <p class="text-gray-500 font-bold">เงินฝากเข้า (เดือนนี้)</p>
+                            <h2 class="text-4xl font-extrabold text-gray-800 mt-2">฿ {{ reportData.save.toLocaleString() }}</h2>
+                        </div>
+                        <i class="fas fa-arrow-alt-circle-down absolute -bottom-5 -right-5 text-8xl text-emerald-50 opacity-50"></i>
+                    </div>
+                    <div class="glass-card p-8 bg-white border-l-8 border-red-500 shadow-sm relative overflow-hidden">
+                        <div class="relative z-10">
+                            <p class="text-gray-500 font-bold">ยอดหักเงิน (เดือนนี้)</p>
+                            <h2 class="text-4xl font-extrabold text-gray-800 mt-2">฿ {{ reportData.deduct.toLocaleString() }}</h2>
+                        </div>
+                        <i class="fas fa-arrow-alt-circle-up absolute -bottom-5 -right-5 text-8xl text-red-50 opacity-50"></i>
+                    </div>
+                    <div class="glass-card p-8 bg-gradient-to-br from-emerald-600 to-teal-800 text-white shadow-lg relative overflow-hidden">
+                        <div class="relative z-10">
+                            <p class="opacity-80 font-bold text-emerald-100">เงินออมสุทธิ (เดือนนี้)</p>
+                            <h2 class="text-4xl font-extrabold mt-2 text-white">฿ {{ reportData.net.toLocaleString() }}</h2>
+                        </div>
+                        <i class="fas fa-piggy-bank absolute -bottom-5 -right-5 text-8xl text-black opacity-10"></i>
                     </div>
                 </div>
             </div>
@@ -244,41 +282,57 @@
     </div>
 
     <script>
-        // ตรงนี้ใส่เฉพาะลิงก์ที่มาจาก Google Apps Script เท่านั้นครับ (ขึ้นต้นด้วย https://)
-        const API_URL = "https://script.google.com/macros/s/AKfycbyKpNi82tbg1uZrdPCWcsxjEqa0Irn2WCbDtIh5jbD2_yXvSlOnz5Q87AqiXhq5bLlVYg/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbwCnt18V2psOQxVSa6eDFoWBNgjcB9tqBBlTHlzzrJ6BO3kRr0vc6Dvb2x_NGlDfERc/exec";
 
         const { createApp } = Vue;
         createApp({
             data() {
                 const ac = localStorage.getItem('adminClass') || 'ป.1';
+                
+                // สร้าง List เดือน และปี พ.ศ. ให้เลือก
+                const mList = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+                const currentY = new Date().getFullYear();
+                const yList = [];
+                for(let i = -1; i <= 1; i++) { yList.push({ ce: currentY + i, be: currentY + i + 543 }); }
+
                 return {
                     view: 'save',
                     adminName: localStorage.getItem('adminName') || 'คุณครู',
                     adminClass: ac, 
                     selectedClass: ac === 'Admin' ? 'ทั้งหมด' : ac,
                     showProfileMenu: false,
+                    
                     toast: { show: false, msg: '', type: 'success' },
                     
-                    saveId: '', saveInfo: null, saveAmount: null, loadingSave: false, showSaveAnim: false, newBalance: 0,
+                    saveId: '', saveInfo: null, saveAmount: null, loadingSave: false, showSaveAnim: false, newBalance: 0, loadingSearch: false,
                     deductMode: 'single', transDate: new Date().toISOString().slice(0,10), transNote: '', deductId: '', deductAmount: null, selectedStudents: [], students: [], loadingDeduct: false,
                     myMoneyId: '', myMoneyInfo: null,
-                    manageDate: new Date().toISOString().slice(0,10), manageId: '', manageType: 'save', manageAmount: null, manageNote: '', loadingManage: false, transHistory: []
+                    manageDate: new Date().toISOString().slice(0,10), manageId: '', manageType: 'save', manageAmount: null, manageNote: '', loadingManage: false, transHistory: [],
+                    
+                    // สำหรับหน้ารายงาน
+                    monthList: mList.map((m, i) => ({ val: i + 1, text: m })),
+                    yearList: yList,
+                    reportMonth: new Date().getMonth() + 1,
+                    reportYear: new Date().getFullYear(),
+                    reportData: { save: 0, deduct: 0, net: 0 },
+                    loadingReport: false
                 }
             },
-            computed: { viewTitle() { const titles = { save: 'สะสมทรัพย์นักเรียน', deduct: 'หักลบกลบหนี้', manage: 'จัดการฐานข้อมูล', report: 'รายงานภาพรวม', myMoney: 'เงินฉันมีเท่าไหร่' }; return titles[this.view]; } },
+            computed: { viewTitle() { const titles = { save: 'สะสมทรัพย์นักเรียน', deduct: 'หักลบกลบหนี้', manage: 'จัดการฐานข้อมูล', report: 'รายงานออมทรัพย์ (รายเดือน)', myMoney: 'เงินฉันมีเท่าไหร่' }; return titles[this.view]; } },
             methods: {
                 showToastMsg(msg, type = 'success') {
                     this.toast = { show: true, msg, type };
-                    setTimeout(() => { this.toast.show = false; }, 4000);
                 },
                 refreshData() {
                     this.saveInfo = null; this.myMoneyInfo = null; this.students = [];
                     if(this.view === 'deduct') this.fetchStudentsByClass();
+                    if(this.view === 'report') this.fetchReport();
                 },
                 async changeView(newView) {
                     this.view = newView;
                     if(newView === 'deduct') this.fetchStudentsByClass();
                     if(newView === 'manage') this.fetchTransactions();
+                    if(newView === 'report') this.fetchReport();
                 },
                 async fetchStudentsByClass() {
                     try {
@@ -294,6 +348,17 @@
                         if(data.status === 'success') this.transHistory = data.data;
                     } catch(e) {}
                 },
+                async fetchReport() {
+                    this.loadingReport = true;
+                    try {
+                        const res = await fetch(API_URL, { method: 'POST', redirect: 'follow', headers: {"Content-Type": "text/plain;charset=utf-8"}, 
+                            body: JSON.stringify({ action: 'getReport', classLevel: this.selectedClass, month: this.reportMonth, year: this.reportYear }) 
+                        });
+                        const result = await res.json();
+                        if(result.status === 'success') this.reportData = result.data;
+                    } catch(e) { this.showToastMsg("โหลดรายงานล้มเหลว", "error"); }
+                    this.loadingReport = false;
+                },
                 async deleteTransaction(row) {
                     if(!confirm("คุณแน่ใจที่จะลบและคืนยอดเงิน?")) return;
                     try {
@@ -307,6 +372,9 @@
                 async getStudent(source) {
                     const id = source === 'save' ? this.saveId : this.myMoneyId;
                     if(!id) return;
+                    
+                    this.loadingSearch = true; // เปิดเอฟเฟกต์ค้นหา
+                    
                     try {
                         const res = await fetch(API_URL, { method: 'POST', redirect: 'follow', headers: {"Content-Type": "text/plain;charset=utf-8"}, body: JSON.stringify({ action: 'getStudent', id: id, classLevel: this.selectedClass }) });
                         const result = await res.json();
@@ -319,6 +387,8 @@
                             if(source === 'myMoney') this.myMoneyInfo = null;
                         }
                     } catch (err) { this.showToastMsg("ค้นหาล้มเหลว", "error"); }
+                    
+                    this.loadingSearch = false; // ปิดเอฟเฟกต์ค้นหา
                 },
                 
                 async submitTransaction(type) {
