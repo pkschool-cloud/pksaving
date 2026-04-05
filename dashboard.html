@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>แดชบอร์ด | ระบบออมทรัพย์</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap');
+        body { font-family: 'Kanit', sans-serif; background: #f8fafc; }
+        .menu-active { background: #10b981; color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+        .glass-card { background: white; border-radius: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden text-gray-800">
+
+    <div id="app" class="flex w-full h-full">
+        <aside class="w-72 bg-white border-r border-gray-100 flex flex-col z-10 shadow-lg">
+            <div class="p-8 text-center border-b border-gray-50">
+                <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl"><i class="fas fa-wallet"></i></div>
+                <h2 class="font-bold text-lg">ระบบออมทรัพย์</h2>
+            </div>
+            <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+                <button @click="view = 'save'" :class="{'menu-active': view === 'save', 'text-gray-500 hover:bg-gray-50': view !== 'save'}" class="w-full flex items-center p-4 rounded-xl font-medium transition-all">
+                    <i class="fas fa-piggy-bank mr-4"></i> 1. สะสมทรัพย์
+                </button>
+                <button @click="view = 'deduct'" :class="{'menu-active': view === 'deduct', 'text-gray-500 hover:bg-gray-50': view !== 'deduct'}" class="w-full flex items-center p-4 rounded-xl font-medium transition-all">
+                    <i class="fas fa-hand-holding-usd mr-4"></i> 2. หักลบกลบหนี้
+                </button>
+                <button @click="view = 'manage'" :class="{'menu-active': view === 'manage', 'text-gray-500 hover:bg-gray-50': view !== 'manage'}" class="w-full flex items-center p-4 rounded-xl font-medium transition-all">
+                    <i class="fas fa-history mr-4"></i> 3. จัดการข้อมูลย้อนหลัง
+                </button>
+            </nav>
+            <div class="p-4 border-t border-gray-50">
+                <button onclick="window.location.href='index.html'" class="w-full p-4 text-red-500 hover:bg-red-50 rounded-xl flex items-center transition-all"><i class="fas fa-sign-out-alt mr-4"></i> ออกจากระบบ</button>
+            </div>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto bg-[#f8fafc] p-10">
+            <header class="flex justify-between items-center mb-10">
+                <h1 class="text-3xl font-bold text-gray-800">{{ viewTitle }}</h1>
+                <div class="flex items-center gap-3 bg-white px-5 py-2 rounded-full shadow-sm border border-gray-100">
+                    <div class="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white"><i class="fas fa-user text-sm"></i></div>
+                    <span class="font-medium text-gray-600">{{ adminName }}</span>
+                </div>
+            </header>
+
+            <div v-if="view === 'save'" class="grid grid-cols-1 lg:grid-cols-2 gap-8 animate__animated animate__fadeIn">
+                <div class="glass-card p-10">
+                    <div class="mb-6">
+                        <label class="block text-gray-500 mb-2">รหัสนักเรียน</label>
+                        <input type="text" v-model="searchId" @keyup.enter="fetchStudent" placeholder="กรอกรหัสแล้วกด Enter" class="w-full p-4 bg-gray-50 rounded-xl outline-none ring-1 ring-gray-200 focus:ring-2 focus:ring-emerald-400">
+                    </div>
+                    
+                    <transition name="fade" enter-active-class="animate__animated animate__fadeIn">
+                        <div v-if="student" class="bg-emerald-50 rounded-2xl p-6 border border-emerald-100 mb-6">
+                            <p class="text-sm text-emerald-600 mb-1">ข้อมูลนักเรียน</p>
+                            <h3 class="text-xl font-bold text-emerald-800">{{ student.name }}</h3>
+                            <p class="text-gray-500 mt-2">ยอดสะสมเดิม: <span class="text-emerald-600 font-bold text-lg">฿ {{ student.balance.toLocaleString() }}</span></p>
+                        </div>
+                    </transition>
+
+                    <div v-if="student">
+                        <label class="block text-gray-500 mb-2">จำนวนเงินฝากวันนี้</label>
+                        <input type="number" v-model="amount" placeholder="0.00" class="w-full p-4 bg-white rounded-xl border-2 border-emerald-100 text-2xl font-bold text-center text-emerald-600 outline-none focus:border-emerald-400 mb-6">
+                        <button @click="submitTransaction('save')" class="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold text-lg hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition-all transform active:scale-95">
+                            บันทึกยอดเงิน
+                        </button>
+                    </div>
+                </div>
+
+                <div class="glass-card bg-emerald-900 text-white p-10 flex flex-col justify-center items-center relative overflow-hidden">
+                    <div v-if="!showSuccess" class="text-center opacity-30">
+                        <i class="fas fa-piggy-bank text-8xl mb-4"></i>
+                        <p class="text-xl">รอทำรายการฝากเงิน</p>
+                    </div>
+                    <div v-if="showSuccess" class="text-center animate__animated animate__zoomIn">
+                        <i class="fas fa-check-circle text-yellow-400 text-7xl mb-4 animate__animated animate__bounce"></i>
+                        <h2 class="text-3xl font-bold mb-2">ยอดเยี่ยมมาก!</h2>
+                        <p class="text-emerald-200">อัปเดตยอดเงินสะสมล่าสุด</p>
+                        <p class="text-5xl font-bold text-white mt-4">฿ {{ newBalance.toLocaleString() }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="view === 'deduct'" class="glass-card p-10 animate__animated animate__fadeIn">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold">บันทึกหักเงิน</h2>
+                    <div class="flex bg-gray-100 p-1 rounded-lg">
+                        <button @click="deductMode = 'single'" :class="{'bg-white shadow': deductMode === 'single'}" class="px-4 py-2 rounded-md text-sm font-medium">รายบุคคล</button>
+                        <button @click="deductMode = 'group'" :class="{'bg-white shadow': deductMode === 'group'}" class="px-4 py-2 rounded-md text-sm font-medium">รายกลุ่ม</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">วันที่หักเงิน</label>
+                        <input type="date" v-model="transDate" class="w-full p-3 bg-gray-50 rounded-lg outline-none border border-gray-200">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">สาเหตุ/รายการ</label>
+                        <input type="text" v-model="transNote" placeholder="ระบุรายการหักเงิน..." class="w-full p-3 bg-gray-50 rounded-lg outline-none border border-gray-200">
+                    </div>
+                </div>
+
+                <div v-if="deductMode === 'group'" class="border border-gray-200 rounded-xl overflow-hidden mb-6">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-50">
+                            <tr><th class="p-3 w-16 text-center">เลือก</th><th class="p-3">รหัส</th><th class="p-3">ชื่อ-นามสกุล</th><th class="p-3">ยอดคงเหลือ</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-t border-gray-50">
+                                <td class="p-3 text-center"><input type="checkbox" class="w-4 h-4"></td><td class="p-3">1001</td><td class="p-3">ด.ช. สมชาย ใจดี</td><td class="p-3 text-emerald-600">฿ 1,500</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="flex gap-4 items-end">
+                    <div class="flex-1" v-if="deductMode === 'single'">
+                        <label class="block text-xs text-gray-500 mb-1">รหัสนักเรียน</label>
+                        <input type="text" placeholder="ระบุรหัส..." class="w-full p-3 bg-gray-50 rounded-lg outline-none border border-gray-200">
+                    </div>
+                    <div class="w-1/3">
+                        <label class="block text-xs text-gray-500 mb-1">จำนวนเงิน (บาท)</label>
+                        <input type="number" v-model="amount" class="w-full p-3 bg-white rounded-lg outline-none border-2 border-red-200 text-red-500 font-bold text-center focus:border-red-400">
+                    </div>
+                    <button class="px-6 py-3 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600 transition-all">หักเงิน</button>
+                </div>
+            </div>
+
+            <div v-if="view === 'manage'" class="glass-card p-10 animate__animated animate__fadeIn">
+                <h2 class="text-xl font-bold mb-6 text-gray-800">เพิ่มรายการย้อนหลัง (Backdated Entry)</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">วันที่เกิดรายการจริง</label>
+                        <input type="date" class="w-full p-3 bg-gray-50 rounded-lg outline-none border border-gray-200">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">รหัสนักเรียน</label>
+                        <input type="text" class="w-full p-3 bg-gray-50 rounded-lg outline-none border border-gray-200">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">ประเภท</label>
+                        <select class="w-full p-3 bg-gray-50 rounded-lg outline-none border border-gray-200">
+                            <option>ฝากเงิน</option>
+                            <option>หักเงิน</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">จำนวนเงิน</label>
+                        <input type="number" class="w-full p-3 bg-gray-50 rounded-lg outline-none border border-gray-200">
+                    </div>
+                </div>
+                <button class="px-8 py-3 bg-gray-800 text-white rounded-lg font-bold hover:bg-gray-900 transition-all"><i class="fas fa-save mr-2"></i> บันทึกเข้าระบบ</button>
+                <p class="mt-4 text-xs text-gray-400"><i class="fas fa-info-circle"></i> ระบบจะทำการระบุ (Flag) อัตโนมัติว่ารายการนี้เป็นการกรอกข้อมูลย้อนหลังโดยแอดมิน</p>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec"; // วาง URL เดิม
+
+        const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    view: 'save',
+                    adminName: localStorage.getItem('userName') || 'Admin',
+                    searchId: '',
+                    student: null,
+                    amount: '',
+                    showSuccess: false,
+                    newBalance: 0,
+                    
+                    // สำหรับหน้าหักเงิน
+                    deductMode: 'single',
+                    transDate: new Date().toISOString().slice(0,10),
+                    transNote: ''
+                }
+            },
+            computed: {
+                viewTitle() {
+                    if(this.view === 'save') return 'บันทึกสะสมทรัพย์';
+                    if(this.view === 'deduct') return 'จัดการหักลบกลบหนี้';
+                    if(this.view === 'manage') return 'จัดการข้อมูลเพิ่มเติม';
+                }
+            },
+            methods: {
+                async fetchStudent() {
+                    // Demo Mode (แทนการ fetch จริงเพื่อทดสอบ UI)
+                    if(this.searchId) {
+                        this.student = { name: "ด.ช. สมชาย ใจดี", balance: 1500 };
+                    }
+                },
+                async submitTransaction(type) {
+                    if(!this.amount || !this.student) return;
+                    
+                    // กระบวนการเมื่อออมสำเร็จ (จำลอง)
+                    this.newBalance = Number(this.student.balance) + Number(this.amount);
+                    this.showSuccess = true;
+                    
+                    // เคลียร์ค่าหลังจากแอนิเมชันโชว์ 4 วินาที
+                    setTimeout(() => {
+                        this.showSuccess = false;
+                        this.student = null;
+                        this.searchId = '';
+                        this.amount = '';
+                    }, 4000);
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
