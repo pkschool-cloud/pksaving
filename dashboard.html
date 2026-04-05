@@ -215,7 +215,201 @@
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbz5MPwt5sX6Pqg6b-N-xgYkCIRwtNwa2RVIp61XQgOTORt8XiiMUBThRWJDTz_aenZ_Zw/exec"; // เปลี่ยน URL ด้วยครับ
+        const API_URL = "function doPost(e) {
+  // ตั้งค่า CORS Header ให้เว็บอื่นเรียกใช้งานได้
+  var headers = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, GET, OPTIONS"
+  };
+
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var action = data.action;
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var result = {};
+
+    // ==========================================
+    // 1. ฟังก์ชันเข้าสู่ระบบ (Login)
+    // ==========================================
+    if (action === "login") {
+      var sheetUsers = ss.getSheetByName("Users");
+      var usersData = sheetUsers.getDataRange().getValues();
+      var isLoginSuccess = false;
+
+      for (var i = 1; i < usersData.length; i++) {
+        if (usersData[i][0].toString().trim() === data.username.toString().trim() && 
+            usersData[i][1].toString().trim() === data.password.toString().trim()) {
+          result = { 
+            status: "success", 
+            name: usersData[i][2], // ชื่อครู
+            role: usersData[i][3]  // ระดับชั้นที่ดูแล
+          };
+          isLoginSuccess = true;
+          break;
+        }
+      }
+      if (!isLoginSuccess) result = { status: "error", message: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง" };
+    }
+
+    // ==========================================
+    // 2. ดึงข้อมูลนักเรียน 1 คน (สแกนรหัส)
+    // ==========================================
+    else if (action === "getStudent") {
+      var sheetStudents = ss.getSheetByName("Students");
+      var studentsData = sheetStudents.getDataRange().getValues();
+      var studentFound = false;
+
+      for (var i = 1; i < studentsData.length; i++) {
+        if (studentsData[i][0].toString().trim() === data.id.toString().trim()) {
+          result = { 
+            status: "success", 
+            data: { id: studentsData[i][0], name: studentsData[i][1], balance: Number(studentsData[i][2]) } 
+          };
+          studentFound = true;
+          break;
+        }
+      }
+      if (!studentFound) result = { status: "error", message: "ไม่พบข้อมูลนักเรียนรหัสนี้" };
+    }
+
+    // ==========================================
+    // 3. ดึงนักเรียนทั้งห้อง (สำหรับหักรายกลุ่ม)
+    // ==========================================
+    else if (action === "getStudents") {
+      var studentsData = ss.getSheetByName("Students").getDataRange().getValues();
+      var list = [];
+      for (var i = 1; i < studentsData.length; i++) {
+        // ดึงเฉพาะเด็กที่อยู่ห้องเดียวกับที่ครูรับผิดชอบ
+        if (studentsData[i][3] == data.classLevel) {
+          list.push({ id: studentsData[i][0], name: studentsData[i][1], balance: Number(studentsData[i][2]) });
+        }
+      }
+      result = { status: "success", data: list };
+    }
+
+    // ==========================================
+    // 4. บันทึก ฝาก/หัก/ย้อนหลัง (รายคน)
+    // ==========================================
+    else if (action === "transaction") {
+      var sheetStudents = ss.getSheetByName("Students");
+      var sheetTrans = ss.getSheetByName("Transactions");
+      var studentsData = sheetStudents.getDataRange().getValues();
+      var updateSuccess = false;
+
+      for (var i = 1; i < studentsData.length; i++) {
+        if (studentsData[i][0].toString() === data.studentId.toString()) {
+          var currentBal = Number(studentsData[i][2]) || 0;
+          var amount = Number(data.amount);
+          var newBal = data.type === 'save' ? currentBal + amount : currentBal - amount;
+
+          // อัปเดตยอดคงเหลือ
+          sheetStudents.getRange(i + 1, 3).setValue(newBal);
+          
+          // บันทึกประวัติ
+          sheetTrans.appendRow([
+            data.date || new Date(), 
+            data.studentId, 
+            data.type === 'save' ? 'ฝากเงิน' : 'หักเงิน', 
+            amount, 
+            data.note || "-", 
+            data.adminName || "System"
+          ]);
+
+          result = { status: "success", newBalance: newBal, message: "ทำรายการสำเร็จ" };
+          updateSuccess = true;
+          break;
+        }
+      }
+      if (!updateSuccess) result = { status: "error", message: "เกิดข้อผิดพลาด ไม่สามารถอัปเดตยอดเงินได้" };
+    }
+
+    // ==========================================
+    // 5. บันทึก หักเงิน (รายกลุ่ม หลายคนพร้อมกัน)
+    // ==========================================
+    else if (action === "transactionGroup") {
+      var sheetStudents = ss.getSheetByName("Students");
+      var sheetTrans = ss.getSheetByName("Transactions");
+      var studentsData = sheetStudents.getDataRange().getValues();
+      var ids = data.studentIds; // Array รหัสนักเรียนที่ถูกเลือก
+      var amount = Number(data.amount);
+
+      for (var j = 0; j < ids.length; j++) {
+        for (var i = 1; i < studentsData.length; i++) {
+          if (studentsData[i][0].toString() === ids[j].toString()) {
+            var currentBal = Number(studentsData[i][2]) || 0;
+            var newBal = currentBal - amount;
+            
+            sheetStudents.getRange(i + 1, 3).setValue(newBal);
+            sheetTrans.appendRow([data.date || new Date(), ids[j], 'หักเงิน', amount, data.note || "-", data.adminName || "System"]);
+            break;
+          }
+        }
+      }
+      result = { status: "success", message: "หักเงินรายกลุ่มสำเร็จ" };
+    }
+
+    // ==========================================
+    // 6. ดึงประวัติย้อนหลัง (หน้ารายการแก้ไข)
+    // ==========================================
+    else if (action === "getTransactions") {
+      var transData = ss.getSheetByName("Transactions").getDataRange().getValues();
+      var list = [];
+      // ดึงย้อนหลัง 50 รายการล่าสุด
+      for (var i = transData.length - 1; i >= 1 && list.length < 50; i--) {
+        list.push({
+          row: i + 1, // เก็บเลขแถวไว้เพื่อใช้ตอนกดลบ
+          date: transData[i][0],
+          studentId: transData[i][1],
+          type: transData[i][2],
+          amount: transData[i][3],
+          note: transData[i][4]
+        });
+      }
+      result = { status: "success", data: list };
+    }
+
+    // ==========================================
+    // 7. ลบรายการที่ผิดพลาด และคืนยอดเงิน
+    // ==========================================
+    else if (action === "deleteTransaction") {
+      var sheetTrans = ss.getSheetByName("Transactions");
+      var sheetStudents = ss.getSheetByName("Students");
+      
+      // ดึงข้อมูลรายการที่จะลบเพื่อไปคำนวณเงินคืน
+      var rowData = sheetTrans.getRange(data.row, 1, 1, 4).getValues()[0];
+      var stuId = rowData[1];
+      var type = rowData[2];
+      var amount = Number(rowData[3]);
+      
+      // คืนยอดเงินในหน้า Students
+      var studentsData = sheetStudents.getDataRange().getValues();
+      for (var i = 1; i < studentsData.length; i++) {
+        if (studentsData[i][0].toString() === stuId.toString()) {
+          var currentBal = Number(studentsData[i][2]);
+          // ถ้าเคยฝาก ให้หักออก, ถ้าเคยหัก ให้บวกกลับ
+          var newBal = (type === 'ฝากเงิน') ? currentBal - amount : currentBal + amount;
+          sheetStudents.getRange(i + 1, 3).setValue(newBal);
+          break;
+        }
+      }
+      
+      // ลบแถวทิ้ง
+      sheetTrans.deleteRow(data.row);
+      result = { status: "success", message: "ลบรายการและคืนยอดเงินเรียบร้อย" };
+    }
+
+    // ส่งข้อมูลกลับไปให้หน้าเว็บ
+    return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({status: "error", message: error.message})).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// ฟังก์ชันรองรับการเช็คสิทธิ์ (Preflight Request)
+function doOptions(e) { 
+  return ContentService.createTextOutput("").setMimeType(ContentService.MimeType.TEXT); 
+}"; // เปลี่ยน URL ด้วยครับ
 
         const { createApp } = Vue;
         createApp({
