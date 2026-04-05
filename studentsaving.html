@@ -3,113 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ตรวจสอบเงินออมนักเรียน | สำหรับผู้ปกครอง</title>
+    <title>ตรวจสอบยอดเงินสะสมทรัพย์ | โรงเรียนป่าก้าง</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Kanit', sans-serif; background-color: #f0fdfa; }
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); box-shadow: 0 10px 40px rgba(0,0,0,0.05); }
-        .bg-gradient-primary { background: linear-gradient(135deg, #0f766e 0%, #064e3b 100%); }
+        
+        /* Glassmorphism Effect */
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(20px); 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.05); 
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+        
+        /* Wallet Card Gradient */
+        .wallet-card {
+            background: linear-gradient(135deg, #0d9488 0%, #047857 100%);
+            box-shadow: 0 15px 30px rgba(13, 148, 136, 0.3);
+        }
+
+        /* Animated Background Elements */
+        .blob { animation: blob 7s infinite; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center bg-gray-50 relative overflow-x-hidden">
+<body class="min-h-screen flex items-center justify-center bg-gray-50 relative overflow-hidden selection:bg-teal-200">
 
-    <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-teal-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
-    <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-emerald-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+    <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 blob"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-emerald-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 blob animation-delay-2000"></div>
 
-    <div id="app" class="w-full max-w-md min-h-screen sm:min-h-[850px] relative z-10 flex flex-col">
+    <div id="app" class="w-full max-w-md min-h-screen sm:min-h-[850px] relative z-10 flex flex-col justify-center">
         
         <transition name="fade" enter-active-class="animate__animated animate__fadeIn" leave-active-class="animate__animated animate__fadeOut absolute w-full hidden">
-            <div v-if="view === 'login'" class="flex-1 flex flex-col justify-center px-6">
-                <div class="glass-card rounded-[2.5rem] p-10 text-center border border-white">
-                    <div class="w-24 h-24 bg-teal-50 text-teal-600 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-inner">
-                        <i class="fas fa-search-dollar text-5xl animate__animated animate__pulse animate__infinite"></i>
-                    </div>
-                    <h1 class="text-2xl font-bold text-gray-800 mb-2">ตรวจสอบยอดเงินออม</h1>
-                    <p class="text-gray-500 mb-8 text-sm">โรงเรียนป่าก้าง (สำหรับผู้ปกครอง)</p>
+            <div v-if="view === 'login'" class="flex-1 flex flex-col justify-center px-6 py-10">
+                <div class="glass-card rounded-[2.5rem] p-8 text-center relative overflow-hidden">
                     
-                    <div class="text-left space-y-4">
-                        <label class="block text-sm font-bold text-teal-700 ml-2">รหัสผู้ปกครอง (Parent Code)</label>
-                        <div class="relative">
-                            <i class="fas fa-key absolute left-5 top-5 text-teal-400"></i>
-                            <input v-model="parentCode" @keyup.enter="fetchData" type="text" placeholder="ระบุรหัส 6 หลัก..." class="w-full pl-14 p-5 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-teal-400 text-lg border border-gray-100 transition-all font-bold text-center tracking-widest uppercase">
+                    <div class="w-20 h-20 bg-gradient-to-br from-teal-50 to-emerald-100 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner ring-4 ring-white relative z-10">
+                        <i class="fas fa-shield-alt text-4xl"></i>
+                    </div>
+                    
+                    <div class="relative z-10 mb-8">
+                        <h1 class="text-xl font-bold text-gray-800 leading-tight">ระบบตรวจสอบยอดเงินสะสมทรัพย์นักเรียน</h1>
+                        <h2 class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-500 mt-1">โรงเรียนป่าก้าง</h2>
+                    </div>
+                    
+                    <div class="text-left space-y-4 relative z-10">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-600 ml-2 mb-2">รหัสประจำตัว (Parent Code)</label>
+                            <div class="relative group">
+                                <i class="fas fa-key absolute left-5 top-5 text-gray-400 group-focus-within:text-teal-500 transition-colors"></i>
+                                <input v-model="parentCode" @keyup.enter="fetchData" type="text" placeholder="ระบุรหัสออมทรัพย์..." class="w-full pl-14 p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white text-xl border border-gray-200 transition-all font-bold text-center tracking-widest uppercase text-teal-700 shadow-inner">
+                            </div>
                         </div>
                         
-                        <p v-if="errorMsg" class="text-red-500 text-sm text-center font-medium animate__animated animate__shakeX"><i class="fas fa-exclamation-circle mr-1"></i>{{ errorMsg }}</p>
+                        <div v-if="errorMsg" class="bg-red-50 text-red-500 text-sm p-3 rounded-xl text-center font-medium animate__animated animate__shakeX border border-red-100">
+                            <i class="fas fa-exclamation-circle mr-1"></i> {{ errorMsg }}
+                        </div>
 
-                        <button @click="fetchData" :disabled="loading" class="w-full py-5 bg-teal-600 text-white rounded-2xl text-lg font-bold hover:bg-teal-700 shadow-xl shadow-teal-900/20 transform active:scale-95 transition-all mt-4 flex justify-center items-center">
-                            <span v-if="!loading">เข้าดูข้อมูล <i class="fas fa-arrow-right ml-2"></i></span>
-                            <span v-else><i class="fas fa-spinner fa-spin mr-2"></i> กำลังค้นหาข้อมูล...</span>
+                        <button @click="fetchData" :disabled="loading" class="w-full py-4 bg-gray-800 text-white rounded-2xl text-lg font-bold hover:bg-gray-900 shadow-xl transform active:scale-95 transition-all mt-2 flex justify-center items-center group">
+                            <span v-if="!loading" class="flex items-center">ตรวจสอบยอดเงิน <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i></span>
+                            <span v-else><i class="fas fa-spinner fa-spin mr-2"></i> กำลังเชื่อมต่อฐานข้อมูล...</span>
                         </button>
+                    </div>
+
+                    <div class="mt-8 bg-red-50/80 border-l-4 border-red-500 p-4 text-left rounded-r-xl relative z-10">
+                        <p class="text-sm text-red-800 font-bold mb-1"><i class="fas fa-lock mr-1"></i> คำเตือนความปลอดภัย</p>
+                        <p class="text-xs text-red-600 leading-relaxed">โปรดอย่าส่งต่อรหัสออมทรัพย์ของนักเรียนแก่บุคคลอื่น หากต้องการแจ้งเปลี่ยนรหัส (มีค่าบริการ)</p>
+                    </div>
+
+                    <div class="mt-6 text-center relative z-10 pt-4 border-t border-gray-100">
+                        <p class="text-xs text-gray-400 font-medium"><i class="fas fa-headset mr-1"></i> หากเข้าตรวจสอบยอดเงินนักเรียนไม่ได้<br>โปรดติดต่อครูที่ปรึกษา</p>
                     </div>
                 </div>
             </div>
         </transition>
 
-        <transition name="slide" enter-active-class="animate__animated animate__slideInUp">
-            <div v-if="view === 'dashboard'" class="flex-1 bg-white sm:rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden relative">
+        <transition name="slide" enter-active-class="animate__animated animate__fadeInRight">
+            <div v-if="view === 'dashboard'" class="flex-1 bg-gray-50 sm:rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden relative">
                 
-                <div class="bg-gradient-primary pt-10 pb-8 px-6 text-white rounded-b-[2.5rem] relative shadow-lg">
-                    <div class="flex justify-between items-center mb-8 relative z-10">
-                        <button @click="logout" class="bg-white/20 hover:bg-white/30 p-2 px-4 rounded-full text-sm backdrop-blur-sm transition-all"><i class="fas fa-chevron-left mr-1"></i> ออก</button>
-                        <span class="font-bold text-teal-100">ห้อง {{ student.class }}</span>
-                    </div>
+                <div class="bg-white pt-8 pb-4 px-6 relative z-10">
+                    <div class="flex justify-between items-center mb-6">
+                        <button @click="logout" class="text-gray-500 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 w-10 h-10 rounded-full flex items-center justify-center transition-all"><i class="fas fa-arrow-left"></i></button>
+                        <h2 class="font-bold text-gray-700">บัญชีสะสมทรัพย์</h2>
+                        <div class="w-10"></div> </div>
                     
-                    <div class="relative z-10">
-                        <p class="text-teal-100 text-sm mb-1 font-medium">ยอดเงินออมคงเหลือสุทธิ</p>
-                        <h2 class="text-5xl font-extrabold mb-4 drop-shadow-md">฿ {{ student.balance.toLocaleString() }}</h2>
-                        <div class="flex items-center gap-3 bg-black/20 w-max px-4 py-2 rounded-full backdrop-blur-sm">
-                            <i class="fas fa-user-graduate text-teal-200"></i>
-                            <span class="font-bold text-sm">{{ student.name }}</span>
+                    <div class="wallet-card rounded-[2rem] p-6 text-white relative overflow-hidden animate__animated animate__zoomIn animate__faster">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-10 -mt-10"></div>
+                        <div class="absolute bottom-0 right-10 w-24 h-24 bg-white opacity-10 rounded-full -mb-10"></div>
+                        
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-start mb-6">
+                                <div>
+                                    <p class="text-teal-100 text-xs font-medium uppercase tracking-wider mb-1">ยอดเงินคงเหลือสุทธิ</p>
+                                    <h2 class="text-4xl font-extrabold tracking-tight">฿ {{ student.balance.toLocaleString() }}</h2>
+                                </div>
+                                <i class="fas fa-piggy-bank text-4xl opacity-50"></i>
+                            </div>
+                            
+                            <div class="flex justify-between items-end">
+                                <div>
+                                    <p class="text-teal-200 text-xs mb-1">ชื่อนักเรียน</p>
+                                    <p class="font-bold text-lg leading-none">{{ student.name }}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-teal-200 text-xs mb-1">ระดับชั้น</p>
+                                    <p class="font-bold text-lg leading-none">{{ student.class }}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <i class="fas fa-piggy-bank absolute -bottom-4 -right-4 text-9xl text-black opacity-10"></i>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4 px-6 -mt-6 relative z-20">
-                    <div class="bg-white rounded-2xl p-4 shadow-lg border border-gray-100 flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-green-100 text-green-500 flex items-center justify-center"><i class="fas fa-arrow-down"></i></div>
+                <div class="grid grid-cols-2 gap-4 px-6 pt-2 pb-6 bg-white relative z-10 rounded-b-3xl shadow-sm">
+                    <div class="bg-emerald-50 rounded-2xl p-4 flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center"><i class="fas fa-arrow-down"></i></div>
                         <div>
-                            <p class="text-xs text-gray-400 font-bold">ฝากสะสมรวม</p>
-                            <p class="text-lg font-bold text-gray-700">฿ {{ summary.deposit.toLocaleString() }}</p>
+                            <p class="text-xs text-emerald-600 font-bold">ฝากเงินรวม</p>
+                            <p class="text-lg font-bold text-gray-800">฿ {{ summary.deposit.toLocaleString() }}</p>
                         </div>
                     </div>
-                    <div class="bg-white rounded-2xl p-4 shadow-lg border border-gray-100 flex items-center gap-3">
+                    <div class="bg-red-50 rounded-2xl p-4 flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full bg-red-100 text-red-500 flex items-center justify-center"><i class="fas fa-arrow-up"></i></div>
                         <div>
-                            <p class="text-xs text-gray-400 font-bold">หักเงินรวม</p>
-                            <p class="text-lg font-bold text-gray-700">฿ {{ summary.deduct.toLocaleString() }}</p>
+                            <p class="text-xs text-red-500 font-bold">หักเงินรวม</p>
+                            <p class="text-lg font-bold text-gray-800">฿ {{ summary.deduct.toLocaleString() }}</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex-1 px-6 py-8 overflow-y-auto">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex justify-between">
-                        รายการล่าสุด <span class="text-xs text-teal-500 bg-teal-50 px-3 py-1 rounded-full">{{ transactions.length }} รายการ</span>
-                    </h3>
+                <div class="flex-1 px-6 py-6 overflow-y-auto bg-gray-50">
+                    <div class="flex justify-between items-end mb-4">
+                        <h3 class="font-bold text-gray-800 text-lg">ประวัติการทำรายการ</h3>
+                        <span class="text-xs font-bold text-gray-400 bg-gray-200 px-3 py-1 rounded-full">{{ transactions.length }} รายการ</span>
+                    </div>
                     
-                    <div v-if="transactions.length === 0" class="text-center py-10 text-gray-400">
-                        <i class="fas fa-receipt text-4xl mb-3 opacity-50"></i>
-                        <p>ยังไม่มีประวัติการทำรายการ</p>
+                    <div v-if="transactions.length === 0" class="text-center py-12">
+                        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
+                            <i class="fas fa-receipt text-3xl"></i>
+                        </div>
+                        <p class="text-gray-400 font-medium">ยังไม่มีประวัติการทำรายการ</p>
                     </div>
 
-                    <div class="space-y-4 pb-10">
-                        <div v-for="(t, index) in transactions" :key="index" class="bg-white border border-gray-100 p-4 rounded-2xl shadow-sm flex items-center justify-between hover:shadow-md transition-all">
+                    <div class="space-y-3 pb-10">
+                        <div v-for="(t, index) in transactions" :key="index" class="bg-white p-4 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex items-center justify-between transition-all hover:shadow-md border border-transparent hover:border-gray-100">
                             <div class="flex items-center gap-4">
-                                <div :class="t.type === 'ฝากเงิน' ? 'bg-green-50 text-green-500' : 'bg-red-50 text-red-500'" class="w-12 h-12 rounded-xl flex items-center justify-center text-lg">
+                                <div :class="t.type === 'ฝากเงิน' ? 'bg-emerald-50 text-emerald-500' : 'bg-red-50 text-red-500'" class="w-12 h-12 rounded-full flex items-center justify-center text-lg">
                                     <i :class="t.type === 'ฝากเงิน' ? 'fas fa-plus' : 'fas fa-minus'"></i>
                                 </div>
                                 <div>
-                                    <p class="font-bold text-gray-800">{{ t.type === 'ฝากเงิน' ? 'ออมเงิน' : 'หักเงิน' }}</p>
-                                    <p class="text-xs text-gray-400 flex items-center"><i class="far fa-calendar-alt mr-1"></i> {{ formatDate(t.date) }}</p>
-                                    <p v-if="t.type === 'หักเงิน'" class="text-xs text-red-400 mt-1"><i class="fas fa-info-circle mr-1"></i>{{ t.note }}</p>
+                                    <p class="font-bold text-gray-800">{{ t.type === 'ฝากเงิน' ? 'ฝากเงินออมทรัพย์' : 'รายการหักเงิน' }}</p>
+                                    <p class="text-xs text-gray-400 font-medium">{{ formatDate(t.date) }}</p>
+                                    <p v-if="t.type === 'หักเงิน'" class="text-xs text-red-400 mt-1 bg-red-50 px-2 py-0.5 rounded inline-block"><i class="fas fa-info-circle mr-1"></i>{{ t.note }}</p>
                                 </div>
                             </div>
                             <div class="text-right">
-                                <p :class="t.type === 'ฝากเงิน' ? 'text-green-600' : 'text-red-500'" class="font-extrabold text-lg">
+                                <p :class="t.type === 'ฝากเงิน' ? 'text-emerald-500' : 'text-gray-800'" class="font-extrabold text-lg">
                                     {{ t.type === 'ฝากเงิน' ? '+' : '-' }}{{ t.amount.toLocaleString() }}
                                 </p>
                             </div>
@@ -123,14 +181,14 @@
     </div>
 
     <script>
-        // *** วาง URL ของ Google Web App ที่ได้จากการ Deploy ของคุณวู้ดดี้ ***
+        // *** วาง URL ของ Google Web App ตรงนี้ (อันเดียวกับที่ใช้ในหน้า Dashboard ของครู) ***
         const API_URL = "https://script.google.com/macros/s/AKfycbyP0AdoyrGLqqMuUb2nNfl4fxeLS7PWA_oDV8vTA-KbG4MUeHaavNIvYpgsqLaKO75wzg/exec";
 
         const { createApp } = Vue;
         createApp({
             data() {
                 return {
-                    view: 'login', // login หรือ dashboard
+                    view: 'login', // สลับระหว่าง 'login' กับ 'dashboard'
                     parentCode: '',
                     loading: false,
                     errorMsg: '',
@@ -140,13 +198,15 @@
                 }
             },
             methods: {
+                // แปลงวันที่ให้อ่านง่าย เช่น 5 เม.ย. 2569
                 formatDate(dateString) {
                     const date = new Date(dateString);
                     return date.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
                 },
                 async fetchData() {
                     if(!this.parentCode) {
-                        this.errorMsg = 'กรุณาระบุรหัสผู้ปกครอง'; return;
+                        this.errorMsg = 'โปรดระบุรหัสประจำตัวเพื่อเข้าสู่ระบบ'; 
+                        return;
                     }
                     
                     this.loading = true;
@@ -168,18 +228,20 @@
                             this.summary = result.summary;
                             this.view = 'dashboard';
                         } else {
-                            this.errorMsg = result.message || "รหัสไม่ถูกต้อง กรุณาลองใหม่";
+                            this.errorMsg = result.message || "รหัสไม่ถูกต้อง โปรดตรวจสอบอีกครั้ง";
                         }
                     } catch (err) {
                         console.error(err);
-                        this.errorMsg = "เชื่อมต่อระบบขัดข้อง กรุณาลองใหม่ภายหลัง";
+                        this.errorMsg = "เชื่อมต่อระบบขัดข้อง โปรดลองใหม่ภายหลัง";
                     }
                     this.loading = false;
                 },
                 logout() {
+                    // ล้างข้อมูลและกลับไปหน้าล็อคอิน
                     this.parentCode = '';
                     this.student = { name: '', balance: 0, class: '' };
                     this.transactions = [];
+                    this.errorMsg = '';
                     this.view = 'login';
                 }
             }
