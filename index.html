@@ -3,53 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เข้าสู่ระบบ | ระบบออมทรัพย์</title>
+    <title>เข้าสู่ระบบ | ระบบออมทรัพย์โรงเรียนป่าก้าง</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap');
-        body { font-family: 'Kanit', sans-serif; background: #f0fdf4; }
-        .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.5); }
+        body { font-family: 'Kanit', sans-serif; background: #064e3b; }
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.2); }
+        .input-focus { transition: all 0.3s; border: 2px solid transparent; }
+        .input-focus:focus { border-color: #10b981; box-shadow: 0 0 20px rgba(16, 185, 129, 0.2); }
+        .coin-anim { animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
     </style>
 </head>
-<body class="h-screen flex items-center justify-center bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] relative">
+<body class="h-screen flex items-center justify-center relative px-4">
     
-    <div class="absolute top-0 left-0 w-full h-2 bg-emerald-500"></div>
+    <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/leaf.png')]"></div>
 
-    <div class="glass-panel w-full max-w-md p-10 rounded-[2rem] shadow-2xl animate__animated animate__fadeInUp">
-        <div class="text-center mb-8">
-            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 animate__animated animate__bounceIn">
-                <i class="fas fa-piggy-bank text-4xl"></i>
-            </div>
-            <h1 class="text-2xl font-bold text-gray-800">ระบบออมทรัพย์</h1>
-            <p class="text-gray-500">ลงชื่อเข้าใช้งานสำหรับเจ้าหน้าที่</p>
+    <div class="glass-panel w-full max-w-md p-10 rounded-[3rem] shadow-2xl z-10 animate__animated animate__zoomIn text-center">
+        <div class="mb-8 coin-anim">
+            <i class="fas fa-piggy-bank text-8xl text-emerald-600"></i>
         </div>
-
-        <form id="loginForm" class="space-y-5">
-            <div>
-                <label class="block text-sm text-gray-500 mb-1 ml-1">ชื่อผู้ใช้งาน</label>
-                <div class="relative">
-                    <i class="fas fa-user absolute left-4 top-4 text-emerald-500"></i>
-                    <input type="text" id="username" class="w-full pl-12 p-3 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-emerald-400 transition-all" required>
-                </div>
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">ยินดีต้อนรับ</h1>
+        <p class="text-gray-500 mb-8 text-lg">ระบบออมทรัพย์โรงเรียนป่าก้าง</p>
+        
+        <form id="loginForm" class="space-y-6 text-left">
+            <div class="relative">
+                <i class="fas fa-user absolute left-5 top-5 text-gray-400"></i>
+                <input type="text" id="username" placeholder="ชื่อผู้ใช้งาน" class="w-full pl-14 p-5 bg-gray-50 rounded-2xl outline-none input-focus text-lg" required>
             </div>
-            <div>
-                <label class="block text-sm text-gray-500 mb-1 ml-1">รหัสผ่าน</label>
-                <div class="relative">
-                    <i class="fas fa-lock absolute left-4 top-4 text-emerald-500"></i>
-                    <input type="password" id="password" class="w-full pl-12 p-3 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-emerald-400 transition-all" required>
-                </div>
+            <div class="relative">
+                <i class="fas fa-lock absolute left-5 top-5 text-gray-400"></i>
+                <input type="password" id="password" placeholder="รหัสผ่าน" class="w-full pl-14 p-5 bg-gray-50 rounded-2xl outline-none input-focus text-lg" required>
             </div>
-            <button type="submit" id="btnSubmit" class="w-full py-4 mt-4 bg-emerald-600 text-white font-bold rounded-xl shadow-lg hover:bg-emerald-700 active:scale-95 transition-all">
-                เข้าสู่ระบบ
+            <button type="submit" id="btnSubmit" class="w-full py-5 bg-emerald-500 text-white rounded-2xl text-xl font-bold hover:bg-emerald-600 shadow-xl shadow-emerald-900/20 transform active:scale-95 transition-all flex justify-center items-center">
+                เข้าสู่ระบบ <i class="fas fa-arrow-right ml-2"></i>
             </button>
         </form>
+        <p class="mt-8 text-gray-400 text-sm italic">"ออมวันนี้ เพื่ออนาคตที่สดใสของเด็กไทย"</p>
+    </div>
+
+    <div id="errorToast" class="fixed top-8 left-1/2 transform -translate-x-1/2 z-50 bg-red-500 text-white px-8 py-4 rounded-full shadow-2xl font-bold hidden items-center gap-3 animate__animated animate__fadeInDown">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="errorMsg">เกิดข้อผิดพลาด</span>
     </div>
 
     <script>
-        // *** ลบลิงก์นี้ออก แล้วเอา URL ที่ได้จาก Google Apps Script (ลงท้ายด้วย /exec) มาใส่แทนที่ในเครื่องหมายคำพูดครับ ***
+        // ลิงก์ API ล่าสุดที่คุณวู้ดดี้ให้มา
         const API_URL = "https://script.google.com/macros/s/AKfycbz5MPwt5sX6Pqg6b-N-xgYkCIRwtNwa2RVIp61XQgOTORt8XiiMUBThRWJDTz_aenZ_Zw/exec";
+
+        function showError(msg) {
+            const toast = document.getElementById('errorToast');
+            document.getElementById('errorMsg').innerText = msg;
+            toast.style.display = 'flex';
+            setTimeout(() => { toast.style.display = 'none'; }, 4000);
+        }
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -57,30 +66,36 @@
             const user = document.getElementById('username').value;
             const pass = document.getElementById('password').value;
 
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังตรวจสอบ...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> กำลังตรวจสอบ...';
             btn.disabled = true;
 
             try {
-                // โค้ดส่วนนี้คือของจริงที่เชื่อมต่อกับ Google Sheet แล้วครับ
+                // อัปเกรด Fetch API ให้รองรับ Google Apps Script ได้สมบูรณ์ 100%
                 const response = await fetch(API_URL, {
                     method: 'POST',
+                    redirect: 'follow', // จำเป็นมากสำหรับ Google Script
+                    headers: {
+                        "Content-Type": "text/plain;charset=utf-8", // บังคับให้ข้ามการตรวจสอบ CORS
+                    },
                     body: JSON.stringify({ action: 'login', username: user, password: pass })
                 });
                 
                 const result = await response.json();
 
                 if(result.status === "success") {
-                    localStorage.setItem('userName', result.name); // เก็บชื่อผู้ใช้ไว้แสดงหน้า Dashboard
-                    window.location.href = "dashboard.html"; // กระโดดไปหน้า Dashboard
+                    // ส่งตัวแปร 2 ตัวให้หน้า Dashboard (ชื่อ กับ ระดับชั้น)
+                    localStorage.setItem('adminName', result.name); 
+                    localStorage.setItem('adminClass', result.role); 
+                    window.location.href = "dashboard.html"; 
                 } else {
-                    alert(result.message || "ข้อมูลไม่ถูกต้อง กรุณาลองใหม่");
-                    btn.innerHTML = 'เข้าสู่ระบบ';
+                    showError(result.message || "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
+                    btn.innerHTML = 'เข้าสู่ระบบ <i class="fas fa-arrow-right ml-2"></i>';
                     btn.disabled = false;
                 }
             } catch (err) {
-                alert("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาตรวจสอบลิงก์ API_URL หรือการตั้งค่า Google Sheet");
                 console.error(err);
-                btn.innerHTML = 'เข้าสู่ระบบ';
+                showError("เชื่อมต่อไม่สำเร็จ! กรุณาเช็คว่า Deploy สิทธิ์เป็น 'Anyone' หรือยัง");
+                btn.innerHTML = 'เข้าสู่ระบบ <i class="fas fa-arrow-right ml-2"></i>';
                 btn.disabled = false;
             }
         });
