@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap');
         body { font-family: 'Kanit', sans-serif; background: #f8fafc; }
         .menu-active { background: #10b981; color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
         .glass-card { background: white; border-radius: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
@@ -113,9 +113,7 @@
                         <i class="fas fa-chevron-down text-gray-300 ml-2"></i>
                     </div>
                     <div v-if="showProfileMenu" class="absolute right-0 mt-3 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50 animate__animated animate__fadeIn animate__faster">
-                        <button class="w-full text-left px-5 py-3 text-sm text-gray-600 hover:bg-gray-50"><i class="fas fa-key mr-2"></i> เปลี่ยนรหัสผ่าน</button>
-                        <hr class="border-gray-50">
-                        <button onclick="window.location.href='index.html'" class="w-full text-left px-5 py-3 text-sm text-red-500 hover:bg-red-50 font-bold"><i class="fas fa-sign-out-alt mr-2"></i> ออกจากระบบ</button>
+                        <button class="w-full text-left px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 font-bold"><i class="fas fa-key mr-2"></i> เปลี่ยนรหัสผ่าน</button>
                     </div>
                 </div>
             </header>
@@ -149,9 +147,8 @@
                                             <p class="text-emerald-600 font-medium text-sm">ชั้นเรียน: {{ saveInfo.class }}</p>
                                         </div>
                                     </div>
-                                    <div class="text-right">
-                                        <p class="text-xs text-gray-400 font-bold mb-1">ยอดคงเหลือเดิม</p>
-                                        <p class="text-2xl font-extrabold text-emerald-700">฿ {{ saveInfo.balance.toLocaleString() }}</p>
+                                    <div class="text-right flex items-center text-emerald-500 opacity-60">
+                                        <i class="fas fa-check-circle text-2xl"></i>
                                     </div>
                                 </div>
 
@@ -209,19 +206,12 @@
 
                         <div class="dashed-divider"></div>
 
-                        <div class="text-center mb-2">
+                        <div class="text-center mb-4">
                             <p class="text-sm text-gray-500 font-bold mb-1">จำนวนเงินฝากครั้งนี้</p>
                             <h1 class="text-4xl font-extrabold text-gray-800">฿ {{ lastSlip.amount.toLocaleString() }}</h1>
                         </div>
 
-                        <div class="dashed-divider"></div>
-
-                        <div class="flex justify-between items-center bg-emerald-50 rounded-xl p-4">
-                            <p class="text-sm text-emerald-700 font-bold">ยอดเงินคงเหลือสุทธิ</p>
-                            <p class="text-lg font-bold text-emerald-700">฿ {{ lastSlip.newBalance.toLocaleString() }}</p>
-                        </div>
-
-                        <button @click="clearSaveForm" class="w-full mt-8 py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-900 transition-all flex justify-center items-center shadow-lg active:scale-95">
+                        <button @click="clearSaveForm" class="w-full mt-4 py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-900 transition-all flex justify-center items-center shadow-lg active:scale-95">
                             <i class="fas fa-undo-alt mr-2"></i> ทำรายการต่อไป
                         </button>
                     </div>
@@ -332,6 +322,7 @@
             </div>
 
             <div id="printable-report" v-if="view === 'report'" class="animate__animated animate__fadeIn space-y-6">
+                
                 <div class="text-center hidden print:block mb-8">
                     <h2 class="text-2xl font-bold">รายงานสรุปเงินออมทรัพย์ โรงเรียนป่าก้าง</h2>
                     <p class="text-gray-500">ข้อมูลระดับชั้น: {{ selectedClass }}</p>
@@ -351,7 +342,7 @@
                         </select>
                     </div>
                     <div class="flex-1 text-right">
-                        <button @click="printReport" class="bg-gray-800 text-white px-6 py-3 rounded-xl font-bold hover:bg-gray-900 transition-all shadow-lg"><i class="fas fa-print mr-2"></i> ส่งออกรายงาน (PDF)</button>
+                        <button @click="printReport" class="bg-gray-800 text-white px-6 py-3 rounded-xl font-bold hover:bg-gray-900 transition-all shadow-lg"><i class="fas fa-print mr-2"></i> ส่งออกรายงาน (PDF / ปริ้นท์)</button>
                     </div>
                 </div>
 
@@ -359,6 +350,7 @@
                     <div v-if="loadingReport" class="absolute inset-0 bg-white/50 backdrop-blur-sm z-10 flex items-center justify-center rounded-2xl no-print">
                         <i class="fas fa-spinner fa-spin text-4xl text-emerald-500"></i>
                     </div>
+                    
                     <div class="glass-card p-8 bg-gradient-to-br from-emerald-600 to-teal-800 text-white shadow-lg relative overflow-hidden">
                         <div class="relative z-10">
                             <p class="opacity-80 font-bold text-emerald-100">เงินฝากนักเรียนทั้งหมด (ยอดปัจจุบัน)</p>
@@ -366,19 +358,21 @@
                         </div>
                         <i class="fas fa-wallet absolute -bottom-5 -right-5 text-8xl text-black opacity-10"></i>
                     </div>
+
                     <div class="glass-card p-8 bg-white border-l-8 border-emerald-500 shadow-sm relative overflow-hidden">
                         <div class="relative z-10">
                             <p class="text-gray-500 font-bold">เงินฝากนักเรียน (เฉพาะเดือนนี้)</p>
                             <h2 class="text-4xl font-extrabold text-emerald-600 mt-2">฿ {{ reportData.currentNet.toLocaleString() }}</h2>
-                            <p class="text-xs text-gray-400 mt-2">*คำนวณหักลบยอดถอนแล้ว</p>
+                            <p class="text-xs text-gray-400 mt-2">*คำนวณหักลบยอดถอนของเดือนปัจจุบันแล้ว</p>
                         </div>
                         <i class="fas fa-calendar-check absolute -bottom-5 -right-5 text-8xl text-emerald-50 opacity-50"></i>
                     </div>
+
                     <div class="glass-card p-8 bg-white border-l-8 border-blue-500 shadow-sm relative overflow-hidden">
                         <div class="relative z-10">
-                            <p class="text-gray-500 font-bold">เงินฝาก (เดือนที่เลือก)</p>
+                            <p class="text-gray-500 font-bold">เงินฝาก (เดือนที่เลือก: {{ getMonthName(reportMonth) }})</p>
                             <h2 class="text-4xl font-extrabold text-blue-600 mt-2">฿ {{ reportData.selectedNet.toLocaleString() }}</h2>
-                            <p class="text-xs text-gray-400 mt-2">*คำนวณหักลบยอดถอนแล้ว</p>
+                            <p class="text-xs text-gray-400 mt-2">*ยอดเงินสุทธิประจำเดือนที่กดค้นหา</p>
                         </div>
                         <i class="fas fa-search-dollar absolute -bottom-5 -right-5 text-8xl text-blue-50 opacity-50"></i>
                     </div>
@@ -409,8 +403,8 @@
                     toast: { show: false, msg: '', type: 'success' },
                     
                     saveId: '', saveInfo: null, saveAmount: null, loadingSave: false, showSaveAnim: false, loadingSearch: false,
-                    lastSlip: null, // เก็บข้อมูลสลิป
-                    searchTimeout: null, // หน่วงเวลาพิมพ์ค้นหา
+                    lastSlip: null, 
+                    searchTimeout: null, 
                     
                     deductMode: 'single', transDate: new Date().toISOString().slice(0,10), transNote: '', deductId: '', deductAmount: null, selectedStudents: [], students: [], loadingDeduct: false,
                     myMoneyId: '', myMoneyInfo: null,
@@ -430,6 +424,10 @@
             methods: {
                 showToastMsg(msg, type = 'success') {
                     this.toast = { show: true, msg, type };
+                },
+                getMonthName(val) {
+                    const m = this.monthList.find(x => x.val === parseInt(val));
+                    return m ? m.text : '';
                 },
                 printReport() { window.print(); },
                 refreshData() {
@@ -459,7 +457,6 @@
                     if (this.autoRefreshTimer) { clearInterval(this.autoRefreshTimer); this.autoRefreshTimer = null; }
                 },
 
-                // 🌟 ระบบค้นหาอัตโนมัติ (หน่วง 0.5 วิ)
                 handleSearchInput() {
                     clearTimeout(this.searchTimeout);
                     if (!this.saveId || this.saveId.trim() === '') {
@@ -472,7 +469,6 @@
                     }, 500); 
                 },
 
-                // 🌟 ระบบเคลียร์ฟอร์มหลังโอนเสร็จ
                 clearSaveForm() {
                     this.saveId = '';
                     this.saveInfo = null;
@@ -481,7 +477,7 @@
                     this.lastSlip = null;
                     this.$nextTick(() => {
                         const input = document.getElementById('saveSearchInput');
-                        if(input) input.focus(); // เด้งให้พิมพ์คนต่อไปอัตโนมัติ
+                        if(input) input.focus(); 
                     });
                 },
 
@@ -530,7 +526,6 @@
                         if(result.status === "success") {
                             if(source === 'save') {
                                 this.saveInfo = result.data;
-                                // สั่งให้ Focus ที่ช่องใส่เงินอัตโนมัติ
                                 this.$nextTick(() => {
                                     const amtInput = document.getElementById('saveAmountInput');
                                     if(amtInput) amtInput.focus();
@@ -576,16 +571,14 @@
                         if(result.status === "success") {
                             
                             if(type === 'save') {
-                                // สร้างข้อมูลใส่ลงไปในสลิป
                                 this.lastSlip = {
                                     studentName: this.saveInfo.name,
                                     studentId: this.saveInfo.id,
                                     amount: this.saveAmount,
-                                    newBalance: result.newBalance,
                                     adminName: this.adminName,
                                     date: new Date().toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' })
                                 };
-                                this.showSaveAnim = true; // โชว์สลิปค้างไว้ ไม่ตั้งเวลาปิด!
+                                this.showSaveAnim = true; 
                             } else {
                                 this.showToastMsg("ทำรายการสำเร็จ!");
                                 if(type === 'deduct') { this.deductId = ''; this.deductAmount = null; this.selectedStudents = []; this.fetchStudentsByClass(); }
