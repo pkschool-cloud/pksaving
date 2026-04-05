@@ -125,7 +125,7 @@
                         <div class="w-10 h-10 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center shrink-0"><i class="fas fa-shield-alt"></i></div>
                         <div>
                             <p class="text-sm text-gray-700 font-bold mb-1">ความปลอดภัยบัญชี</p>
-                            <p class="text-[11px] text-gray-500 leading-relaxed font-medium">โปรดอย่ามอบรหัสผ่านแก่ผู้อื่น หากลืมรหัสหรือต้องการเปลี่ยนรหัสผ่าน (มีค่าบริการดำเนินการ)</p>
+                            <p class="text-[11px] text-gray-500 leading-relaxed font-medium">โปรดอย่ามอบรหัสผ่านแก่ผู้อื่น หากท่านประสงค์เปลี่ยนรหัสผ่าน (มีค่าดำเนินการ)</p>
                         </div>
                     </div>
                     
@@ -164,7 +164,7 @@
                             </div>
                             
                             <div class="relative z-10 mb-6">
-                                <p class="text-green-100 text-xs font-medium mb-1 opacity-90">ยอดเงินคงเหลือสามารถใช้ได้</p>
+                                <p class="text-green-100 text-xs font-medium mb-1 opacity-90">ยอดเงินฝากสะสมทรัพย์รวม (บาท)</p>
                                 <h2 class="text-4xl font-bold tracking-tight text-white drop-shadow-md">฿ {{ student.balance.toLocaleString() }}</h2>
                             </div>
                             
@@ -194,7 +194,7 @@
                             <div class="absolute -right-4 -top-4 w-16 h-16 bg-red-50 rounded-full opacity-50"></div>
                             <div class="flex items-center gap-2 mb-3 relative z-10">
                                 <div class="w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center text-xs shadow-md shadow-red-200"><i class="fas fa-arrow-up"></i></div>
-                                <span class="text-xs text-gray-500 font-bold">หักเงินรวม</span>
+                                <span class="text-xs text-gray-500 font-bold">รวมเงินหัก</span>
                             </div>
                             <p class="text-xl font-bold text-gray-800 relative z-10">฿ {{ summary.deduct.toLocaleString() }}</p>
                         </div>
@@ -211,7 +211,7 @@
                                 <i class="fas fa-file-invoice-dollar text-3xl text-gray-300"></i>
                             </div>
                             <p class="text-gray-500 text-sm font-medium">ยังไม่มีประวัติการทำรายการ</p>
-                            <p class="text-xs text-gray-400 mt-1">เมื่อมีการฝากหรือหักเงินจะแสดงที่นี่</p>
+                            <p class="text-xs text-gray-400 mt-1">เมื่อมียอดฝากหรือยอดหักเงินจะแสดงที่นี่</p>
                         </div>
 
                         <div class="space-y-4">
