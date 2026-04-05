@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>แดชบอร์ด | ระบบออมทรัพย์</title>
+    <title>แดชบอร์ด | ระบบออมทรัพย์โรงเรียน</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
@@ -12,8 +12,6 @@
         body { font-family: 'Kanit', sans-serif; background: #f8fafc; }
         .menu-active { background: #10b981; color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
         .glass-card { background: white; border-radius: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
-        
-        /* Toast Animation */
         .toast-enter-active, .toast-leave-active { transition: all 0.5s ease; }
         .toast-enter-from, .toast-leave-to { opacity: 0; transform: translateY(-30px); }
     </style>
@@ -33,7 +31,7 @@
             <div class="p-8 text-center border-b border-gray-50">
                 <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl"><i class="fas fa-school"></i></div>
                 <h2 class="font-bold text-lg text-gray-800">โรงเรียนป่าก้าง</h2>
-                <p class="text-xs text-gray-400 mt-1">รับผิดชอบชั้น: {{ adminClass }}</p>
+                <p class="text-xs text-gray-500 mt-1">บทบาท: <span class="font-bold text-emerald-600">{{ adminClass }}</span></p>
             </div>
             <nav class="flex-1 p-5 space-y-2 overflow-y-auto">
                 <button @click="view = 'save'" :class="{'menu-active': view === 'save', 'text-gray-500 hover:bg-emerald-50': view !== 'save'}" class="w-full flex items-center p-4 rounded-2xl font-medium transition-all">
@@ -55,10 +53,26 @@
         </aside>
 
         <main class="flex-1 overflow-y-auto bg-[#f8fafc] p-10">
+            
             <header class="flex justify-between items-center mb-10 relative">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-800">{{ viewTitle }}</h1>
-                    <p class="text-gray-400">ข้อมูลปัจจุบันเชื่อมโยงกับระดับชั้น {{ adminClass }} เท่านั้น</p>
+                <div class="flex items-center gap-6">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-800">{{ viewTitle }}</h1>
+                        <p class="text-gray-400">ดึงข้อมูลระดับชั้น: {{ selectedClass }}</p>
+                    </div>
+                    
+                    <div v-if="adminClass === 'Admin'" class="bg-emerald-50 p-2 rounded-xl border border-emerald-100 flex items-center gap-3">
+                        <label class="text-sm font-bold text-emerald-700 ml-2">สิทธิ์แอดมิน (เลือกชั้น):</label>
+                        <select v-model="selectedClass" @change="refreshData" class="p-2 bg-white rounded-lg border outline-none font-bold text-emerald-800 focus:ring-2 focus:ring-emerald-400 cursor-pointer">
+                            <option value="ทั้งหมด">โรงเรียนทั้งหมด</option>
+                            <option value="ป.1">ป.1</option>
+                            <option value="ป.2">ป.2</option>
+                            <option value="ป.3">ป.3</option>
+                            <option value="ป.4">ป.4</option>
+                            <option value="ป.5">ป.5</option>
+                            <option value="ป.6">ป.6</option>
+                        </select>
+                    </div>
                 </div>
                 
                 <div class="relative cursor-pointer" @click="showProfileMenu = !showProfileMenu">
@@ -70,7 +84,6 @@
                         </div>
                         <i class="fas fa-chevron-down text-gray-300 ml-2"></i>
                     </div>
-                    
                     <div v-if="showProfileMenu" class="absolute right-0 mt-3 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50 animate__animated animate__fadeIn animate__faster">
                         <button class="w-full text-left px-5 py-3 text-sm text-gray-600 hover:bg-gray-50"><i class="fas fa-key mr-2"></i> เปลี่ยนรหัสผ่าน</button>
                         <hr class="border-gray-50">
@@ -81,18 +94,33 @@
 
             <div v-if="view === 'save'" class="grid grid-cols-1 md:grid-cols-2 gap-8 animate__animated animate__fadeIn">
                 <div class="glass-card p-10">
-                    <label class="block text-gray-500 mb-2">รหัสนักเรียน (เฉพาะชั้น {{ adminClass }})</label>
+                    <label class="block text-gray-500 mb-2">รหัสนักเรียน (อ้างอิงชั้น {{ selectedClass }})</label>
                     <div class="relative mb-6">
                         <input v-model="saveId" @keyup.enter="getStudent('save')" type="text" placeholder="สแกน หรือ กรอกรหัสนักเรียน..." class="w-full pl-12 p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-400">
                         <i class="fas fa-search absolute left-4 top-5 text-gray-400"></i>
                     </div>
                     <div v-if="saveInfo" class="space-y-6">
-                        <div class="bg-emerald-50 p-6 rounded-2xl border border-emerald-100">
-                            <h3 class="text-xl font-bold text-emerald-800">{{ saveInfo.name }}</h3>
-                            <p class="text-emerald-600">ยอดสะสม: ฿ {{ saveInfo.balance.toLocaleString() }}</p>
+                        <div class="bg-emerald-50 p-6 rounded-2xl border border-emerald-100 flex justify-between items-center">
+                            <div>
+                                <h3 class="text-xl font-bold text-emerald-800">{{ saveInfo.name }}</h3>
+                                <p class="text-emerald-600">ชั้น: {{ saveInfo.class }} | ยอดเดิม: ฿ {{ saveInfo.balance.toLocaleString() }}</p>
+                            </div>
                         </div>
-                        <input v-model.number="saveAmount" type="number" placeholder="จำนวนเงินวันนี้" class="w-full p-4 bg-white border-2 border-emerald-100 rounded-2xl outline-none text-2xl font-bold text-center text-emerald-600">
-                        <button @click="submitTransaction('save')" class="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold hover:bg-emerald-700 shadow-lg">บันทึกยอดเงิน</button>
+                        <input v-model.number="saveAmount" type="number" placeholder="จำนวนเงินวันนี้ (บาท)" class="w-full p-4 bg-white border-2 border-emerald-100 rounded-2xl outline-none text-2xl font-bold text-center text-emerald-600">
+                        <button @click="submitTransaction('save')" :disabled="loadingSave" class="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold hover:bg-emerald-700 shadow-lg">
+                            <span v-if="!loadingSave">บันทึกยอดเงิน</span><span v-else><i class="fas fa-spinner fa-spin"></i> กำลังบันทึก</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="glass-card bg-emerald-900 rounded-[3rem] p-10 flex flex-col justify-center items-center text-white relative overflow-hidden shadow-2xl">
+                    <div v-if="!showSaveAnim" class="text-center opacity-30">
+                        <i class="fas fa-piggy-bank text-9xl mb-6"></i>
+                        <p class="text-2xl font-light">รอทำรายการ</p>
+                    </div>
+                    <div v-if="showSaveAnim" class="text-center animate__animated animate__bounceIn">
+                        <i class="fas fa-check-circle text-8xl text-yellow-400 mb-6 animate__animated animate__bounce"></i>
+                        <h2 class="text-3xl font-bold mb-2">ออมเงินสำเร็จ!</h2>
+                        <p class="text-5xl font-bold mt-4">฿ {{ newBalance.toLocaleString() }}</p>
                     </div>
                 </div>
             </div>
@@ -102,40 +130,54 @@
                     <h2 class="text-2xl font-bold">หักลบกลบหนี้</h2>
                     <div class="flex bg-gray-100 p-1 rounded-xl">
                         <button @click="deductMode = 'single'" :class="deductMode === 'single' ? 'bg-white shadow text-emerald-600' : 'text-gray-400'" class="px-4 py-2 rounded-lg text-sm font-bold transition-all">รายบุคคล</button>
-                        <button @click="deductMode = 'group'" :class="deductMode === 'group' ? 'bg-white shadow text-emerald-600' : 'text-gray-400'" class="px-4 py-2 rounded-lg text-sm font-bold transition-all">รายกลุ่ม (ทั้งห้อง)</button>
+                        <button @click="deductMode = 'group'" :class="deductMode === 'group' ? 'bg-white shadow text-emerald-600' : 'text-gray-400'" class="px-4 py-2 rounded-lg text-sm font-bold transition-all">รายกลุ่ม</button>
                     </div>
                 </div>
-                
                 <div class="grid grid-cols-2 gap-4 mb-6">
                     <input type="date" v-model="transDate" class="w-full p-4 bg-gray-50 rounded-xl outline-none border">
-                    <input type="text" v-model="transNote" placeholder="ระบุสาเหตุ..." class="w-full p-4 bg-gray-50 rounded-xl outline-none border">
+                    <input type="text" v-model="transNote" placeholder="ระบุสาเหตุ (เช่น ค่าสมุด)..." class="w-full p-4 bg-gray-50 rounded-xl outline-none border">
                 </div>
-
                 <div v-if="deductMode === 'group'" class="border border-gray-100 rounded-2xl overflow-hidden mb-6 h-64 overflow-y-auto">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-gray-50 sticky top-0">
-                            <tr><th class="p-4 text-center"><input type="checkbox" @change="selectAll($event)" class="w-4 h-4"></th><th class="p-4">รหัส</th><th class="p-4">ชื่อ-นามสกุล</th><th class="p-4">ยอดเงินคงเหลือ</th></tr>
+                            <tr><th class="p-4 text-center"><input type="checkbox" @change="selectAll($event)" class="w-4 h-4"></th><th class="p-4">ชั้น</th><th class="p-4">รหัส</th><th class="p-4">ชื่อ-นามสกุล</th><th class="p-4">ยอดคงเหลือ</th></tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50">
                             <tr v-for="st in students" :key="st.id" class="hover:bg-emerald-50">
                                 <td class="p-4 text-center"><input type="checkbox" v-model="selectedStudents" :value="st.id"></td>
-                                <td class="p-4">{{ st.id }}</td><td class="p-4">{{ st.name }}</td><td class="p-4 font-bold text-emerald-600">฿ {{ st.balance.toLocaleString() }}</td>
+                                <td class="p-4 text-gray-500">{{ st.class }}</td><td class="p-4">{{ st.id }}</td><td class="p-4">{{ st.name }}</td><td class="p-4 font-bold text-emerald-600">฿ {{ st.balance.toLocaleString() }}</td>
                             </tr>
-                            <tr v-if="students.length === 0"><td colspan="4" class="p-8 text-center text-gray-400">กำลังดึงข้อมูล หรือไม่มีนักเรียนในชั้นนี้</td></tr>
+                            <tr v-if="students.length === 0"><td colspan="5" class="p-8 text-center text-gray-400">ไม่มีนักเรียนในชั้น {{ selectedClass }}</td></tr>
                         </tbody>
                     </table>
                 </div>
-
                 <div class="flex gap-4 items-end">
                     <input v-if="deductMode === 'single'" v-model="deductId" type="text" placeholder="รหัสนักเรียน" class="flex-1 p-4 bg-gray-50 rounded-xl outline-none border">
                     <input v-model.number="deductAmount" type="number" placeholder="จำนวนเงินหัก (บาท)" class="w-1/3 p-4 bg-white border-2 border-red-200 text-2xl font-bold text-center text-red-500 rounded-xl focus:border-red-400">
-                    <button @click="submitTransaction('deduct')" class="px-8 py-4 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600">หักเงิน</button>
+                    <button @click="submitTransaction('deduct')" :disabled="loadingDeduct" class="px-8 py-4 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600">
+                        <span v-if="!loadingDeduct">หักเงิน</span><span v-else><i class="fas fa-spinner fa-spin"></i></span>
+                    </button>
                 </div>
+            </div>
+
+            <div v-if="view === 'myMoney'" class="max-w-3xl mx-auto glass-card p-10 shadow-2xl border border-gray-100 animate__animated animate__fadeIn">
+                <h3 class="text-center font-bold text-3xl mb-10 text-gray-700">🔍 ค้นหายอดเงินสะสม (Student View)</h3>
+                <div class="flex gap-4 mb-10 relative">
+                    <input v-model="myMoneyId" @keyup.enter="getStudent('myMoney')" type="text" placeholder="กรอกรหัสนักเรียนเพื่อค้นหา..." class="flex-1 p-5 bg-gray-50 rounded-2xl outline-none focus:ring-4 focus:ring-emerald-100 text-xl border">
+                    <button @click="getStudent('myMoney')" class="px-8 py-5 bg-emerald-600 text-white rounded-2xl font-bold text-xl hover:bg-emerald-700"><i class="fas fa-search mr-2"></i> ค้นหา</button>
+                </div>
+                <transition name="fade" enter-active-class="animate__animated animate__fadeInUp">
+                    <div v-if="myMoneyInfo" class="bg-gradient-to-br from-emerald-50 to-emerald-100 p-10 rounded-[2.5rem] border border-emerald-200 relative overflow-hidden text-center shadow-lg">
+                        <p class="text-emerald-700 font-bold mb-1">ยินดีด้วย! นักเรียนมีเงินออมรวม</p>
+                        <h2 class="text-6xl font-extrabold text-emerald-800 my-4">฿ {{ myMoneyInfo.balance.toLocaleString() }}</h2>
+                        <p class="text-xl font-medium text-emerald-700 mt-2">{{ myMoneyInfo.name }} ({{ myMoneyInfo.class }})</p>
+                    </div>
+                </transition>
             </div>
 
             <div v-if="view === 'manage'" class="animate__animated animate__fadeIn">
                 <div class="glass-card p-8 mb-8">
-                    <h3 class="font-bold text-xl mb-4 text-gray-700">บันทึกรายการย้อนหลัง / แก้ไข</h3>
+                    <h3 class="font-bold text-xl mb-4 text-gray-700">เพิ่มรายการย้อนหลัง</h3>
                     <div class="grid grid-cols-4 gap-4 mb-4">
                         <input type="date" v-model="manageDate" class="p-3 bg-gray-50 rounded-lg border outline-none">
                         <input type="text" v-model="manageId" placeholder="รหัสนักเรียน" class="p-3 bg-gray-50 rounded-lg border outline-none">
@@ -146,15 +188,14 @@
                         <input type="number" v-model.number="manageAmount" placeholder="จำนวนเงิน" class="p-3 bg-gray-50 rounded-lg border outline-none">
                     </div>
                     <div class="flex gap-4">
-                        <input type="text" v-model="manageNote" placeholder="หมายเหตุ..." class="flex-1 p-3 bg-gray-50 rounded-lg border outline-none">
-                        <button @click="submitTransaction('manage')" class="px-6 py-3 bg-gray-800 text-white rounded-lg font-bold">บันทึก</button>
+                        <input type="text" v-model="manageNote" placeholder="หมายเหตุ (เช่น ลืมกรอกเมื่อวาน)..." class="flex-1 p-3 bg-gray-50 rounded-lg border outline-none">
+                        <button @click="submitTransaction('manage')" :disabled="loadingManage" class="px-6 py-3 bg-gray-800 text-white rounded-lg font-bold">บันทึกเพิ่ม</button>
                     </div>
                 </div>
-
                 <div class="glass-card p-8 h-80 overflow-y-auto">
-                    <h3 class="font-bold text-xl mb-4 text-gray-700">ประวัติการทำรายการล่าสุด</h3>
+                    <h3 class="font-bold text-xl mb-4 text-gray-700">ประวัติการทำรายการล่าสุด (ลบ/แก้ไข)</h3>
                     <table class="w-full text-left text-sm">
-                        <thead class="bg-gray-50">
+                        <thead class="bg-gray-50 sticky top-0">
                             <tr><th class="p-3">วันที่</th><th class="p-3">รหัส</th><th class="p-3">ประเภท</th><th class="p-3">จำนวนเงิน</th><th class="p-3">หมายเหตุ</th><th class="p-3 text-center">จัดการ</th></tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -168,7 +209,6 @@
                                     <button @click="deleteTransaction(t.row)" class="text-red-400 hover:text-red-600 px-3 py-1 bg-red-50 rounded-lg"><i class="fas fa-trash-alt"></i></button>
                                 </td>
                             </tr>
-                            <tr v-if="transHistory.length === 0"><td colspan="6" class="p-6 text-center text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i> กำลังโหลดข้อมูล...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -177,35 +217,24 @@
             <div v-if="view === 'report'" class="animate__animated animate__fadeIn space-y-6">
                 <div class="grid grid-cols-3 gap-6">
                     <div class="glass-card p-6 bg-gradient-to-br from-emerald-500 to-emerald-700 text-white shadow-lg">
-                        <p class="opacity-80">ยอดเงินออมรวมทั้งหมด</p>
+                        <p class="opacity-80">เงินออมรวม (เฉพาะชั้น {{ selectedClass }})</p>
                         <h2 class="text-4xl font-bold mt-2">฿ 45,200</h2>
-                        <p class="text-xs mt-2 opacity-70">เฉพาะนักเรียนชั้น {{ adminClass }}</p>
                     </div>
                     <div class="glass-card p-6 bg-white border border-emerald-100 shadow-sm">
                         <p class="text-gray-500">เงินฝากรวมเดือนนี้</p>
                         <h2 class="text-3xl font-bold text-emerald-600 mt-2">฿ 12,500</h2>
-                        <p class="text-xs mt-2 text-emerald-400"><i class="fas fa-arrow-up"></i> เพิ่มจากเดือนที่แล้ว 15%</p>
                     </div>
                     <div class="glass-card p-6 bg-white border border-red-100 shadow-sm">
-                        <p class="text-gray-500">รายการหักลบเดือนนี้</p>
+                        <p class="text-gray-500">ยอดหักเงินรวมเดือนนี้</p>
                         <h2 class="text-3xl font-bold text-red-500 mt-2">฿ 2,300</h2>
                     </div>
                 </div>
-
                 <div class="glass-card p-8">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="font-bold text-xl text-gray-700">ประวัติออมรายเดือน</h3>
-                        <div class="flex gap-4">
-                            <select class="p-2 border rounded-lg bg-gray-50 outline-none">
-                                <option>ปีการศึกษา 2569</option>
-                            </select>
-                            <button class="bg-gray-800 text-white px-4 py-2 rounded-lg font-bold"><i class="fas fa-file-pdf mr-2"></i> ส่งออก PDF</button>
-                        </div>
-                    </div>
+                    <h3 class="font-bold text-xl text-gray-700 mb-6">ประวัติออมรายเดือน (ตัวอย่าง UI)</h3>
                     <div class="h-48 flex items-end gap-4 border-b border-gray-200 pb-2">
-                        <div class="flex-1 flex flex-col justify-end items-center group"><div class="w-12 bg-emerald-200 group-hover:bg-emerald-400 transition-all rounded-t-lg" style="height: 40%;"></div><span class="text-xs mt-2 text-gray-400">ม.ค.</span></div>
-                        <div class="flex-1 flex flex-col justify-end items-center group"><div class="w-12 bg-emerald-200 group-hover:bg-emerald-400 transition-all rounded-t-lg" style="height: 60%;"></div><span class="text-xs mt-2 text-gray-400">ก.พ.</span></div>
-                        <div class="flex-1 flex flex-col justify-end items-center group"><div class="w-12 bg-emerald-200 group-hover:bg-emerald-400 transition-all rounded-t-lg" style="height: 50%;"></div><span class="text-xs mt-2 text-gray-400">มี.ค.</span></div>
+                        <div class="flex-1 flex flex-col justify-end items-center group"><div class="w-12 bg-emerald-200 rounded-t-lg" style="height: 40%;"></div><span class="text-xs mt-2 text-gray-400">ม.ค.</span></div>
+                        <div class="flex-1 flex flex-col justify-end items-center group"><div class="w-12 bg-emerald-200 rounded-t-lg" style="height: 60%;"></div><span class="text-xs mt-2 text-gray-400">ก.พ.</span></div>
+                        <div class="flex-1 flex flex-col justify-end items-center group"><div class="w-12 bg-emerald-200 rounded-t-lg" style="height: 50%;"></div><span class="text-xs mt-2 text-gray-400">มี.ค.</span></div>
                         <div class="flex-1 flex flex-col justify-end items-center group"><div class="w-12 bg-emerald-500 rounded-t-lg shadow-lg" style="height: 90%;"></div><span class="text-xs mt-2 text-gray-800 font-bold">เม.ย.</span></div>
                     </div>
                 </div>
@@ -215,222 +244,36 @@
     </div>
 
     <script>
-        const API_URL = "function doPost(e) {
-  // ตั้งค่า CORS Header ให้เว็บอื่นเรียกใช้งานได้
-  var headers = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, GET, OPTIONS"
-  };
-
-  try {
-    var data = JSON.parse(e.postData.contents);
-    var action = data.action;
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var result = {};
-
-    // ==========================================
-    // 1. ฟังก์ชันเข้าสู่ระบบ (Login)
-    // ==========================================
-    if (action === "login") {
-      var sheetUsers = ss.getSheetByName("Users");
-      var usersData = sheetUsers.getDataRange().getValues();
-      var isLoginSuccess = false;
-
-      for (var i = 1; i < usersData.length; i++) {
-        if (usersData[i][0].toString().trim() === data.username.toString().trim() && 
-            usersData[i][1].toString().trim() === data.password.toString().trim()) {
-          result = { 
-            status: "success", 
-            name: usersData[i][2], // ชื่อครู
-            role: usersData[i][3]  // ระดับชั้นที่ดูแล
-          };
-          isLoginSuccess = true;
-          break;
-        }
-      }
-      if (!isLoginSuccess) result = { status: "error", message: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง" };
-    }
-
-    // ==========================================
-    // 2. ดึงข้อมูลนักเรียน 1 คน (สแกนรหัส)
-    // ==========================================
-    else if (action === "getStudent") {
-      var sheetStudents = ss.getSheetByName("Students");
-      var studentsData = sheetStudents.getDataRange().getValues();
-      var studentFound = false;
-
-      for (var i = 1; i < studentsData.length; i++) {
-        if (studentsData[i][0].toString().trim() === data.id.toString().trim()) {
-          result = { 
-            status: "success", 
-            data: { id: studentsData[i][0], name: studentsData[i][1], balance: Number(studentsData[i][2]) } 
-          };
-          studentFound = true;
-          break;
-        }
-      }
-      if (!studentFound) result = { status: "error", message: "ไม่พบข้อมูลนักเรียนรหัสนี้" };
-    }
-
-    // ==========================================
-    // 3. ดึงนักเรียนทั้งห้อง (สำหรับหักรายกลุ่ม)
-    // ==========================================
-    else if (action === "getStudents") {
-      var studentsData = ss.getSheetByName("Students").getDataRange().getValues();
-      var list = [];
-      for (var i = 1; i < studentsData.length; i++) {
-        // ดึงเฉพาะเด็กที่อยู่ห้องเดียวกับที่ครูรับผิดชอบ
-        if (studentsData[i][3] == data.classLevel) {
-          list.push({ id: studentsData[i][0], name: studentsData[i][1], balance: Number(studentsData[i][2]) });
-        }
-      }
-      result = { status: "success", data: list };
-    }
-
-    // ==========================================
-    // 4. บันทึก ฝาก/หัก/ย้อนหลัง (รายคน)
-    // ==========================================
-    else if (action === "transaction") {
-      var sheetStudents = ss.getSheetByName("Students");
-      var sheetTrans = ss.getSheetByName("Transactions");
-      var studentsData = sheetStudents.getDataRange().getValues();
-      var updateSuccess = false;
-
-      for (var i = 1; i < studentsData.length; i++) {
-        if (studentsData[i][0].toString() === data.studentId.toString()) {
-          var currentBal = Number(studentsData[i][2]) || 0;
-          var amount = Number(data.amount);
-          var newBal = data.type === 'save' ? currentBal + amount : currentBal - amount;
-
-          // อัปเดตยอดคงเหลือ
-          sheetStudents.getRange(i + 1, 3).setValue(newBal);
-          
-          // บันทึกประวัติ
-          sheetTrans.appendRow([
-            data.date || new Date(), 
-            data.studentId, 
-            data.type === 'save' ? 'ฝากเงิน' : 'หักเงิน', 
-            amount, 
-            data.note || "-", 
-            data.adminName || "System"
-          ]);
-
-          result = { status: "success", newBalance: newBal, message: "ทำรายการสำเร็จ" };
-          updateSuccess = true;
-          break;
-        }
-      }
-      if (!updateSuccess) result = { status: "error", message: "เกิดข้อผิดพลาด ไม่สามารถอัปเดตยอดเงินได้" };
-    }
-
-    // ==========================================
-    // 5. บันทึก หักเงิน (รายกลุ่ม หลายคนพร้อมกัน)
-    // ==========================================
-    else if (action === "transactionGroup") {
-      var sheetStudents = ss.getSheetByName("Students");
-      var sheetTrans = ss.getSheetByName("Transactions");
-      var studentsData = sheetStudents.getDataRange().getValues();
-      var ids = data.studentIds; // Array รหัสนักเรียนที่ถูกเลือก
-      var amount = Number(data.amount);
-
-      for (var j = 0; j < ids.length; j++) {
-        for (var i = 1; i < studentsData.length; i++) {
-          if (studentsData[i][0].toString() === ids[j].toString()) {
-            var currentBal = Number(studentsData[i][2]) || 0;
-            var newBal = currentBal - amount;
-            
-            sheetStudents.getRange(i + 1, 3).setValue(newBal);
-            sheetTrans.appendRow([data.date || new Date(), ids[j], 'หักเงิน', amount, data.note || "-", data.adminName || "System"]);
-            break;
-          }
-        }
-      }
-      result = { status: "success", message: "หักเงินรายกลุ่มสำเร็จ" };
-    }
-
-    // ==========================================
-    // 6. ดึงประวัติย้อนหลัง (หน้ารายการแก้ไข)
-    // ==========================================
-    else if (action === "getTransactions") {
-      var transData = ss.getSheetByName("Transactions").getDataRange().getValues();
-      var list = [];
-      // ดึงย้อนหลัง 50 รายการล่าสุด
-      for (var i = transData.length - 1; i >= 1 && list.length < 50; i--) {
-        list.push({
-          row: i + 1, // เก็บเลขแถวไว้เพื่อใช้ตอนกดลบ
-          date: transData[i][0],
-          studentId: transData[i][1],
-          type: transData[i][2],
-          amount: transData[i][3],
-          note: transData[i][4]
-        });
-      }
-      result = { status: "success", data: list };
-    }
-
-    // ==========================================
-    // 7. ลบรายการที่ผิดพลาด และคืนยอดเงิน
-    // ==========================================
-    else if (action === "deleteTransaction") {
-      var sheetTrans = ss.getSheetByName("Transactions");
-      var sheetStudents = ss.getSheetByName("Students");
-      
-      // ดึงข้อมูลรายการที่จะลบเพื่อไปคำนวณเงินคืน
-      var rowData = sheetTrans.getRange(data.row, 1, 1, 4).getValues()[0];
-      var stuId = rowData[1];
-      var type = rowData[2];
-      var amount = Number(rowData[3]);
-      
-      // คืนยอดเงินในหน้า Students
-      var studentsData = sheetStudents.getDataRange().getValues();
-      for (var i = 1; i < studentsData.length; i++) {
-        if (studentsData[i][0].toString() === stuId.toString()) {
-          var currentBal = Number(studentsData[i][2]);
-          // ถ้าเคยฝาก ให้หักออก, ถ้าเคยหัก ให้บวกกลับ
-          var newBal = (type === 'ฝากเงิน') ? currentBal - amount : currentBal + amount;
-          sheetStudents.getRange(i + 1, 3).setValue(newBal);
-          break;
-        }
-      }
-      
-      // ลบแถวทิ้ง
-      sheetTrans.deleteRow(data.row);
-      result = { status: "success", message: "ลบรายการและคืนยอดเงินเรียบร้อย" };
-    }
-
-    // ส่งข้อมูลกลับไปให้หน้าเว็บ
-    return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
-
-  } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({status: "error", message: error.message})).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-// ฟังก์ชันรองรับการเช็คสิทธิ์ (Preflight Request)
-function doOptions(e) { 
-  return ContentService.createTextOutput("").setMimeType(ContentService.MimeType.TEXT); 
-}"; // เปลี่ยน URL ด้วยครับ
+        // ตรงนี้ใส่เฉพาะลิงก์ที่มาจาก Google Apps Script เท่านั้นครับ (ขึ้นต้นด้วย https://)
+        const API_URL = "https://script.google.com/macros/s/AKfycbyKpNi82tbg1uZrdPCWcsxjEqa0Irn2WCbDtIh5jbD2_yXvSlOnz5Q87AqiXhq5bLlVYg/exec";
 
         const { createApp } = Vue;
         createApp({
             data() {
+                const ac = localStorage.getItem('adminClass') || 'ป.1';
                 return {
                     view: 'save',
                     adminName: localStorage.getItem('adminName') || 'คุณครู',
-                    adminClass: localStorage.getItem('adminClass') || 'ป.6/1', // รับค่าชั้นมาจากหน้า Login
+                    adminClass: ac, 
+                    selectedClass: ac === 'Admin' ? 'ทั้งหมด' : ac,
                     showProfileMenu: false,
                     toast: { show: false, msg: '', type: 'success' },
                     
-                    saveId: '', saveInfo: null, saveAmount: null, loadingSave: false,
-                    deductMode: 'single', transDate: new Date().toISOString().slice(0,10), transNote: '', deductId: '', deductAmount: null, selectedStudents: [], students: [],
-                    manageDate: new Date().toISOString().slice(0,10), manageId: '', manageType: 'save', manageAmount: null, manageNote: '', transHistory: []
+                    saveId: '', saveInfo: null, saveAmount: null, loadingSave: false, showSaveAnim: false, newBalance: 0,
+                    deductMode: 'single', transDate: new Date().toISOString().slice(0,10), transNote: '', deductId: '', deductAmount: null, selectedStudents: [], students: [], loadingDeduct: false,
+                    myMoneyId: '', myMoneyInfo: null,
+                    manageDate: new Date().toISOString().slice(0,10), manageId: '', manageType: 'save', manageAmount: null, manageNote: '', loadingManage: false, transHistory: []
                 }
             },
-            computed: { viewTitle() { const titles = { save: 'สะสมทรัพย์นักเรียน', deduct: 'หักลบกลบหนี้', manage: 'จัดการฐานข้อมูล', report: 'รายงานภาพรวม' }; return titles[this.view]; } },
+            computed: { viewTitle() { const titles = { save: 'สะสมทรัพย์นักเรียน', deduct: 'หักลบกลบหนี้', manage: 'จัดการฐานข้อมูล', report: 'รายงานภาพรวม', myMoney: 'เงินฉันมีเท่าไหร่' }; return titles[this.view]; } },
             methods: {
                 showToastMsg(msg, type = 'success') {
                     this.toast = { show: true, msg, type };
                     setTimeout(() => { this.toast.show = false; }, 4000);
+                },
+                refreshData() {
+                    this.saveInfo = null; this.myMoneyInfo = null; this.students = [];
+                    if(this.view === 'deduct') this.fetchStudentsByClass();
                 },
                 async changeView(newView) {
                     this.view = newView;
@@ -439,35 +282,80 @@ function doOptions(e) {
                 },
                 async fetchStudentsByClass() {
                     try {
-                        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getStudents', classLevel: this.adminClass }) });
+                        const res = await fetch(API_URL, { method: 'POST', redirect: 'follow', headers: {"Content-Type": "text/plain;charset=utf-8"}, body: JSON.stringify({ action: 'getStudents', classLevel: this.selectedClass }) });
                         const data = await res.json();
                         if(data.status === 'success') this.students = data.data;
-                    } catch(e) { this.showToastMsg("ไม่สามารถดึงรายชื่อนักเรียนได้", "error"); }
+                    } catch(e) { this.showToastMsg("ดึงรายชื่อนักเรียนล้มเหลว", "error"); }
                 },
                 async fetchTransactions() {
-                    this.transHistory = [];
                     try {
-                        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'getTransactions' }) });
+                        const res = await fetch(API_URL, { method: 'POST', redirect: 'follow', headers: {"Content-Type": "text/plain;charset=utf-8"}, body: JSON.stringify({ action: 'getTransactions' }) });
                         const data = await res.json();
                         if(data.status === 'success') this.transHistory = data.data;
                     } catch(e) {}
                 },
                 async deleteTransaction(row) {
-                    if(!confirm("คุณแน่ใจหรือไม่ที่จะลบรายการนี้ และคืนยอดเงิน?")) return;
+                    if(!confirm("คุณแน่ใจที่จะลบและคืนยอดเงิน?")) return;
                     try {
-                        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteTransaction', row: row }) });
+                        const res = await fetch(API_URL, { method: 'POST', redirect: 'follow', headers: {"Content-Type": "text/plain;charset=utf-8"}, body: JSON.stringify({ action: 'deleteTransaction', row: row }) });
                         const data = await res.json();
-                        if(data.status === 'success') {
-                            this.showToastMsg("ลบข้อมูลและคืนยอดเงินสำเร็จ!");
-                            this.fetchTransactions(); // ดึงประวัติใหม่
-                        }
-                    } catch(e) { this.showToastMsg("เกิดข้อผิดพลาดในการลบ", "error"); }
+                        if(data.status === 'success') { this.showToastMsg("ลบข้อมูลสำเร็จ!"); this.fetchTransactions(); }
+                    } catch(e) { this.showToastMsg("ลบล้มเหลว", "error"); }
                 },
                 selectAll(e) { this.selectedStudents = e.target.checked ? this.students.map(s => s.id) : []; },
                 
-                // ... (ฟังก์ชัน getStudent และ submitTransaction คง logic เดิมไว้แต่เปลี่ยน alert(...) เป็น this.showToastMsg(...) แทน) ...
                 async getStudent(source) {
-                    // Logic เดิม แต่ใช้ toast
+                    const id = source === 'save' ? this.saveId : this.myMoneyId;
+                    if(!id) return;
+                    try {
+                        const res = await fetch(API_URL, { method: 'POST', redirect: 'follow', headers: {"Content-Type": "text/plain;charset=utf-8"}, body: JSON.stringify({ action: 'getStudent', id: id, classLevel: this.selectedClass }) });
+                        const result = await res.json();
+                        if(result.status === "success") {
+                            if(source === 'save') this.saveInfo = result.data;
+                            if(source === 'myMoney') this.myMoneyInfo = result.data;
+                        } else {
+                            this.showToastMsg(result.message, "error");
+                            if(source === 'save') this.saveInfo = null;
+                            if(source === 'myMoney') this.myMoneyInfo = null;
+                        }
+                    } catch (err) { this.showToastMsg("ค้นหาล้มเหลว", "error"); }
+                },
+                
+                async submitTransaction(type) {
+                    let payload;
+                    if(type === 'save') {
+                        if(!this.saveAmount || !this.saveInfo) return;
+                        this.loadingSave = true;
+                        payload = { action: 'transaction', studentId: this.saveInfo.id, type: 'save', amount: this.saveAmount, adminName: this.adminName };
+                    } else if(type === 'deduct') {
+                        if(!this.deductAmount || !this.transNote) { this.showToastMsg("กรุณากรอกข้อมูลให้ครบ", "error"); return; }
+                        this.loadingDeduct = true;
+                        if(this.deductMode === 'single') payload = { action: 'transaction', studentId: this.deductId, type: 'deduct', amount: this.deductAmount, date: this.transDate, note: this.transNote, adminName: this.adminName };
+                        else {
+                            if(this.selectedStudents.length === 0) { this.loadingDeduct = false; return; }
+                            payload = { action: 'transactionGroup', studentIds: this.selectedStudents, type: 'deduct', amount: this.deductAmount, date: this.transDate, note: this.transNote, adminName: this.adminName };
+                        }
+                    } else if(type === 'manage') {
+                        if(!this.manageAmount || !this.manageId || !this.manageNote) return;
+                        this.loadingManage = true;
+                        payload = { action: 'transaction', studentId: this.manageId, type: this.manageType, amount: this.manageAmount, date: this.manageDate, note: this.manageNote + ' (ย้อนหลัง)', adminName: this.adminName };
+                    }
+
+                    try {
+                        const res = await fetch(API_URL, { method: 'POST', redirect: 'follow', headers: {"Content-Type": "text/plain;charset=utf-8"}, body: JSON.stringify(payload) });
+                        const result = await res.json();
+                        if(result.status === "success") {
+                            if(type === 'save') {
+                                this.newBalance = result.newBalance; this.showSaveAnim = true;
+                                setTimeout(() => { this.showSaveAnim = false; this.saveInfo = null; this.saveId = ''; this.saveAmount = null; }, 5000);
+                            } else {
+                                this.showToastMsg("ทำรายการสำเร็จ!");
+                                if(type === 'deduct') { this.deductId = ''; this.deductAmount = null; this.selectedStudents = []; this.fetchStudentsByClass(); }
+                                if(type === 'manage') { this.manageId = ''; this.manageAmount = null; this.manageNote = ''; this.fetchTransactions(); }
+                            }
+                        } else { this.showToastMsg(result.message, "error"); }
+                    } catch (err) { this.showToastMsg("บันทึกล้มเหลว", "error"); }
+                    this.loadingSave = false; this.loadingDeduct = false; this.loadingManage = false;
                 }
             }
         }).mount('#app');
