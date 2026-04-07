@@ -25,12 +25,12 @@
         .toast-enter-active, .toast-leave-active { transition: opacity 0.3s ease; }
         .toast-enter-from, .toast-leave-to { opacity: 0; }
 
-        /* สไตล์สลิป (e-Slip) */
-        .receipt-cutout { position: relative; background: #fff; border-radius: 1.5rem; box-shadow: 0 15px 35px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
-        .receipt-cutout::before, .receipt-cutout::after { content: ''; position: absolute; top: 60%; width: 30px; height: 30px; background: #f8fafc; border-radius: 50%; transform: translateY(-50%); z-index: 10; }
-        .receipt-cutout::before { left: -15px; box-shadow: inset -3px 0 5px rgba(0,0,0,0.02); }
-        .receipt-cutout::after { right: -15px; box-shadow: inset 3px 0 5px rgba(0,0,0,0.02); }
-        .dashed-divider { border-top: 2px dashed #cbd5e1; margin: 1.5rem 0; position: relative; }
+        /* 🌟 สไตล์สลิป (e-Slip) อัปเกรดใหม่ใหญ่ขึ้น 🌟 */
+        .receipt-cutout { position: relative; background: #fff; border-radius: 1.5rem; box-shadow: 0 20px 40px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; }
+        .receipt-cutout::before, .receipt-cutout::after { content: ''; position: absolute; top: 62%; width: 36px; height: 36px; background: #f8fafc; border-radius: 50%; transform: translateY(-50%); z-index: 10; }
+        .receipt-cutout::before { left: -18px; box-shadow: inset -3px 0 5px rgba(0,0,0,0.02); }
+        .receipt-cutout::after { right: -18px; box-shadow: inset 3px 0 5px rgba(0,0,0,0.02); }
+        .dashed-divider { border-top: 2px dashed #cbd5e1; margin: 2rem 0; position: relative; }
 
         /* Digital Passbook Card */
         .passbook-card {
@@ -135,7 +135,7 @@
 
         <aside class="w-72 bg-white flex flex-col shadow-2xl z-20 no-print">
             <div class="p-8 text-center border-b border-gray-50">
-                <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl hover:scale-105 smooth-trans"><i class="fas fa-school"></i></div>
+                <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl hover:scale-105 smooth-trans"><img src="school logo.jpg" alt="logo" class="w-full h-full object-cover rounded-xl" onerror="this.style.display='none'"></div>
                 <h2 class="font-bold text-lg text-gray-800">โรงเรียนป่าก้าง</h2>
                 <p class="text-xs text-gray-500 mt-1">บทบาท: <span class="font-bold text-emerald-600">{{ adminClass }}</span></p>
             </div>
@@ -207,7 +207,7 @@
             <transition name="page" mode="out-in">
 
                 <div v-if="view === 'save'" key="save" class="grid grid-cols-1 xl:grid-cols-12 gap-8">
-                    <div class="xl:col-span-7 flex flex-col gap-6">
+                    <div class="xl:col-span-6 2xl:col-span-7 flex flex-col gap-6">
                         <div class="glass-card p-10 border-t-8 border-emerald-500 shadow-lg relative overflow-hidden hover-float">
                             <i class="fas fa-wallet absolute -top-10 -right-10 text-[10rem] text-gray-50 opacity-50 z-0 pointer-events-none"></i>
                             
@@ -251,63 +251,67 @@
                         </div>
                     </div>
 
-                    <div class="xl:col-span-5 flex flex-col justify-center">
+                    <div class="xl:col-span-6 2xl:col-span-5 flex flex-col justify-center">
                         <div v-if="!showSaveAnim" class="h-full glass-card p-10 flex flex-col items-center justify-center bg-gray-50/50 border-dashed border-2 border-gray-200 opacity-60">
                             <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6 text-gray-300"><i class="fas fa-receipt text-4xl"></i></div>
                             <h3 class="text-xl font-bold text-gray-400 mb-2">สลิปฝากเงิน</h3>
                             <p class="text-sm text-gray-400 text-center">สลิปหลักฐานจะปรากฏที่นี่<br>หลังจากทำรายการเสร็จสิ้น</p>
                         </div>
 
-                        <div v-if="showSaveAnim" class="w-full max-w-sm mx-auto animate__animated animate__zoomIn">
-                            <div id="slip-container" class="receipt-cutout p-8 w-full bg-white relative overflow-hidden hover-float">
-                                <i class="fas fa-check-circle absolute -top-10 -right-10 text-[10rem] text-emerald-50 opacity-30 pointer-events-none"></i>
+                        <div v-if="showSaveAnim" class="w-full max-w-md mx-auto animate__animated animate__zoomIn">
+                            <div id="slip-container" class="receipt-cutout p-10 w-full bg-white relative overflow-hidden hover-float">
+                                <i class="fas fa-check-circle absolute -top-10 -right-10 text-[12rem] text-emerald-50 opacity-30 pointer-events-none"></i>
                                 
-                                <div class="text-center mb-6 relative z-10">
-                                    <div class="w-16 h-16 mx-auto bg-white rounded-full flex items-center justify-center mb-3 shadow-[0_0_15px_rgba(16,185,129,0.2)] border-2 border-emerald-100 p-1">
+                                <div class="text-center mb-8 relative z-10">
+                                    <div class="w-20 h-20 mx-auto bg-white rounded-full flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(16,185,129,0.2)] border-2 border-emerald-100 p-1.5">
                                         <img src="school logo.jpg" alt="logo" class="w-full h-full object-cover rounded-full" onerror="this.style.display='none'">
                                     </div>
-                                    <h2 class="font-extrabold text-emerald-600 text-2xl flex items-center justify-center"><i class="fas fa-check-circle mr-2"></i>ทำรายการสำเร็จ</h2>
-                                    <p class="text-gray-500 text-xs mt-1 font-medium">{{ lastSlip.date }}</p>
+                                    <h2 class="font-extrabold text-emerald-600 text-3xl flex items-center justify-center tracking-wide"><i class="fas fa-check-circle mr-2"></i>ทำรายการสำเร็จ</h2>
+                                    <p class="text-gray-500 text-sm mt-2 font-medium">{{ lastSlip.date }}</p>
                                 </div>
                                 
-                                <div class="relative z-10">
-                                    <div class="flex items-center justify-between mb-4">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100"><i class="fas fa-user"></i></div>
+                                <div class="relative z-10 bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
+                                    <div class="flex items-center justify-between mb-5">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-200 shadow-sm text-lg"><i class="fas fa-user"></i></div>
                                             <div>
-                                                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">ผู้ฝาก</p>
-                                                <p class="font-bold text-gray-800 text-sm leading-none">{{ lastSlip.studentName }}</p>
+                                                <p class="text-[11px] text-gray-500 font-bold uppercase tracking-widest mb-1">ผู้ฝาก</p>
+                                                <p class="font-bold text-gray-800 text-base leading-none">{{ lastSlip.studentName }}</p>
                                             </div>
                                         </div>
-                                        <div class="w-10 h-10 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400"><i class="fas fa-qrcode text-xl"></i></div>
+                                        <div class="w-12 h-12 bg-white rounded-xl border border-gray-200 flex items-center justify-center text-gray-400 shadow-sm"><i class="fas fa-qrcode text-2xl"></i></div>
                                     </div>
-                                    <div class="w-0.5 h-6 bg-gray-200 ml-5 my-1"></div>
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100"><i class="fas fa-school"></i></div>
+                                    
+                                    <div class="w-0.5 h-8 bg-gray-200 ml-6 my-2"></div>
+                                    
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center border border-gray-200 shadow-sm p-0.5 overflow-hidden">
+                                            <img src="school logo.jpg" class="w-full h-full object-cover rounded-full" alt="school logo" onerror="this.style.display='none'">
+                                        </div>
                                         <div>
-                                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-0.5">ผู้รับ</p>
-                                            <p class="font-bold text-gray-800 text-sm leading-none">โรงเรียนป่าก้าง</p>
-                                            <p class="text-[10px] text-gray-400 mt-1">ผู้รับเรื่อง: ครู{{ lastSlip.adminName }}</p>
+                                            <p class="text-[11px] text-gray-500 font-bold uppercase tracking-widest mb-1">ผู้รับ</p>
+                                            <p class="font-bold text-gray-800 text-base leading-tight">ระบบบันทึกออมทรัพย์นักเรียน<br>โรงเรียนป่าก้าง</p>
+                                            <p class="text-[11px] text-gray-500 mt-1.5 font-medium bg-white px-2 py-0.5 rounded-md inline-block border border-gray-100">ผู้รับเรื่อง: ครู{{ lastSlip.adminName }}</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="dashed-divider"></div>
+                                <div class="dashed-divider my-8"></div>
 
                                 <div class="text-center mb-2 relative z-10">
-                                    <p class="text-sm text-gray-500 font-bold mb-1">จำนวนเงิน (THB)</p>
-                                    <h1 class="text-[2.5rem] font-extrabold text-gray-800 tracking-tight">{{ lastSlip.amount.toLocaleString() }}.00</h1>
+                                    <p class="text-base text-gray-500 font-bold mb-2 uppercase tracking-widest">จำนวนเงิน (THB)</p>
+                                    <h1 class="text-5xl font-extrabold text-gray-800 tracking-tight">{{ lastSlip.amount.toLocaleString() }}.00</h1>
                                 </div>
-                                <div class="text-center mt-6">
-                                    <p class="text-[9px] text-gray-400 font-mono">REF: PK-{{ Date.now().toString().slice(-8) }}</p>
+                                <div class="text-center mt-8">
+                                    <p class="text-[10px] text-gray-400 font-mono tracking-widest">REF: PK-{{ Date.now().toString().slice(-8) }}</p>
                                 </div>
                             </div>
 
-                            <div class="flex gap-3 mt-4">
-                                <button @click="downloadSlip" class="flex-1 py-3 bg-white border-2 border-emerald-500 text-emerald-600 rounded-xl font-bold hover:bg-emerald-50 smooth-trans btn-press flex justify-center items-center shadow-sm">
+                            <div class="flex gap-4 mt-6">
+                                <button @click="downloadSlip" class="flex-1 py-4 bg-white border-2 border-emerald-500 text-emerald-600 rounded-xl font-bold hover:bg-emerald-50 smooth-trans btn-press flex justify-center items-center shadow-sm text-lg">
                                     <i class="fas fa-download mr-2"></i> บันทึกรูปภาพ
                                 </button>
-                                <button @click="clearSaveForm" class="flex-1 py-3 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-900 smooth-trans btn-press flex justify-center items-center shadow-lg">
+                                <button @click="clearSaveForm" class="flex-1 py-4 bg-gray-800 text-white rounded-xl font-bold hover:bg-gray-900 smooth-trans btn-press flex justify-center items-center shadow-lg text-lg">
                                     ทำรายการต่อไป <i class="fas fa-arrow-right ml-2"></i>
                                 </button>
                             </div>
@@ -1006,3 +1010,5 @@
     </script>
 </body>
 </html>
+
+}
