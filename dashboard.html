@@ -25,7 +25,7 @@
         .toast-enter-active, .toast-leave-active { transition: opacity 0.3s ease; }
         .toast-enter-from, .toast-leave-to { opacity: 0; }
 
-        /* 🌟 สไตล์สลิป (e-Slip) อัปเกรดใหม่ใหญ่ขึ้น 🌟 */
+        /* สไตล์สลิป (e-Slip) อัปเกรดใหม่ใหญ่ขึ้น */
         .receipt-cutout { position: relative; background: #fff; border-radius: 1.5rem; box-shadow: 0 20px 40px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; }
         .receipt-cutout::before, .receipt-cutout::after { content: ''; position: absolute; top: 62%; width: 36px; height: 36px; background: #f8fafc; border-radius: 50%; transform: translateY(-50%); z-index: 10; }
         .receipt-cutout::before { left: -18px; box-shadow: inset -3px 0 5px rgba(0,0,0,0.02); }
@@ -62,7 +62,6 @@
         .report-table tbody.data-body tr:hover { background-color: #f1f5f9; }
         .report-table td.amount { font-family: monospace; font-size: 14px; text-align: right; font-weight: bold; }
         
-        /* 🌟 สไตล์ตารางรายเดือน (Excel Style) 🌟 */
         .table-monthly { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
         .table-monthly th, .table-monthly td { border: 1px solid #000; padding: 4px; text-align: center; }
         .table-monthly th.bg-green { background-color: #dcedc1 !important; font-weight: 600; }
@@ -79,10 +78,8 @@
             .no-print, aside, header { display: none !important; }
             .report-table th { background-color: #f1f5f9 !important; color: #000 !important; }
             .report-table tbody.data-body tr:nth-child(even) { background-color: #f8fafc !important; }
-            
-            /* Print สีให้ตารางรายเดือน */
-            .table-monthly th.bg-green { background-color: #dcedc1 !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .table-monthly td.bg-yellow { background-color: #fff200 !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .table-monthly th.bg-green { background-color: #dcedc1 !important; color: #000 !important; }
+            .table-monthly td.bg-yellow { background-color: #fff200 !important; color: #000 !important; }
         }
     </style>
 </head>
@@ -107,17 +104,20 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-bold text-gray-600 mb-1">รหัสผ่านปัจจุบัน</label>
-                            <input type="password" placeholder="••••••••" class="w-full p-3 bg-gray-50 rounded-xl border border-gray-200 outline-none focus:border-emerald-500 focus:bg-white smooth-trans">
+                            <input v-model="oldPassword" type="password" placeholder="••••••••" class="w-full p-3 bg-gray-50 rounded-xl border border-gray-200 outline-none focus:border-emerald-500 focus:bg-white smooth-trans">
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-gray-600 mb-1">รหัสผ่านใหม่</label>
-                            <input type="password" placeholder="••••••••" class="w-full p-3 bg-gray-50 rounded-xl border border-gray-200 outline-none focus:border-emerald-500 focus:bg-white smooth-trans">
+                            <input v-model="newPassword" type="password" placeholder="••••••••" class="w-full p-3 bg-gray-50 rounded-xl border border-gray-200 outline-none focus:border-emerald-500 focus:bg-white smooth-trans">
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-gray-600 mb-1">ยืนยันรหัสผ่านใหม่</label>
-                            <input type="password" placeholder="••••••••" class="w-full p-3 bg-gray-50 rounded-xl border border-gray-200 outline-none focus:border-emerald-500 focus:bg-white smooth-trans">
+                            <input v-model="confirmPassword" type="password" placeholder="••••••••" class="w-full p-3 bg-gray-50 rounded-xl border border-gray-200 outline-none focus:border-emerald-500 focus:bg-white smooth-trans">
                         </div>
-                        <button @click="submitPasswordChange" class="w-full py-4 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 mt-4 shadow-lg smooth-trans btn-press">บันทึกรหัสผ่านใหม่</button>
+                        <button @click="submitPasswordChange" :disabled="loadingPassword" class="w-full py-4 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 mt-4 shadow-lg smooth-trans btn-press disabled:opacity-50">
+                            <span v-if="!loadingPassword">บันทึกรหัสผ่านใหม่</span>
+                            <span v-else><i class="fas fa-spinner fa-spin mr-2"></i>กำลังบันทึก...</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -135,7 +135,9 @@
 
         <aside class="w-72 bg-white flex flex-col shadow-2xl z-20 no-print">
             <div class="p-8 text-center border-b border-gray-50">
-                <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl hover:scale-105 smooth-trans"><img src="school logo.jpg" alt="logo" class="w-full h-full object-cover rounded-xl" onerror="this.style.display='none'"></div>
+                <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl hover:scale-105 smooth-trans">
+                    <img src="school logo.jpg" alt="logo" class="w-full h-full object-cover rounded-xl" onerror="this.style.display='none'">
+                </div>
                 <h2 class="font-bold text-lg text-gray-800">โรงเรียนป่าก้าง</h2>
                 <p class="text-xs text-gray-500 mt-1">บทบาท: <span class="font-bold text-emerald-600">{{ adminClass }}</span></p>
             </div>
@@ -708,7 +710,7 @@
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbyEI1XdHdNisIwUYrD45MTC4YrYWi1jeoS-YkkQ4FB57_CY5SgaBGvmD5MF5hQB6w649g/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbwd1hpc1Fc3t82YNeD2UcHQeVWKfHgwF89rCq4LkxhGQzNjOTA1tFIzy9MTLv-3D_APMA/exec";
 
         const { createApp } = Vue;
         createApp({
@@ -728,14 +730,19 @@
                     selectedClass: ac === 'Admin' ? 'ทั้งหมด' : ac,
                     showProfileMenu: false,
                     toast: { show: false, msg: '', type: 'success' },
+                    
+                    // สำหรับฟังก์ชันเปลี่ยนรหัสผ่าน (เพิ่มตัวแปร)
                     showPasswordModal: false,
+                    oldPassword: '',
+                    newPassword: '',
+                    confirmPassword: '',
+                    loadingPassword: false,
                     
                     saveId: '', saveInfo: null, saveAmount: null, loadingSave: false, showSaveAnim: false, loadingSearch: false, lastSlip: null, searchTimeout: null, 
                     deductMode: 'single', transDate: todayIso, transNote: '', deductId: '', deductAmount: null, selectedStudents: [], students: [], loadingDeduct: false,
                     myMoneyId: '', myMoneyInfo: null,
                     manageDate: todayIso, manageId: '', manageType: 'save', manageAmount: null, manageNote: '', loadingManage: false, transHistory: [], loadingHistory: false, autoRefreshTimer: null,
                     
-                    // สำหรับรายงาน Custom PDF
                     printOrientation: 'portrait', 
                     reportTimeRange: 'today', 
                     customStartDate: todayIso,
@@ -744,7 +751,6 @@
                     reportTargetId: '',
                     reportData: { history: [], summary: { save: 0, deduct: 0, net: 0, totalBalance: 0 } },
                     
-                    // สำหรับตารางรายงานรายเดือน
                     monthList: mList.map((m, i) => ({ val: i + 1, text: m })),
                     yearList: yList,
                     monthlyTableMonth: new Date().getMonth() + 1,
@@ -771,10 +777,48 @@
                 openPasswordModal() {
                     this.showProfileMenu = false;
                     this.showPasswordModal = true;
+                    this.oldPassword = '';
+                    this.newPassword = '';
+                    this.confirmPassword = '';
                 },
-                submitPasswordChange() {
-                    this.showPasswordModal = false;
-                    this.showToastMsg("ฟังก์ชันเปลี่ยนรหัสผ่านสำเร็จ (จำลอง UI)", "success");
+                
+                // 🌟 ระบบยิง API ไปเปลี่ยนรหัสผ่านจริงๆ 🌟
+                async submitPasswordChange() {
+                    if (!this.oldPassword || !this.newPassword || !this.confirmPassword) {
+                        this.showToastMsg("กรุณากรอกข้อมูลให้ครบถ้วน", "error");
+                        return;
+                    }
+                    if (this.newPassword !== this.confirmPassword) {
+                        this.showToastMsg("รหัสผ่านใหม่และการยืนยันไม่ตรงกัน", "error");
+                        return;
+                    }
+                    
+                    this.loadingPassword = true;
+                    try {
+                        const payload = {
+                            action: 'changePassword',
+                            adminName: this.adminName,
+                            oldPassword: this.oldPassword,
+                            newPassword: this.newPassword
+                        };
+                        const res = await fetch(API_URL, { 
+                            method: 'POST', 
+                            redirect: 'follow', 
+                            headers: {"Content-Type": "text/plain;charset=utf-8"}, 
+                            body: JSON.stringify(payload) 
+                        });
+                        const result = await res.json();
+                        
+                        if (result.status === 'success') {
+                            this.showToastMsg("เปลี่ยนรหัสผ่านสำเร็จเรียบร้อยแล้ว!", "success");
+                            this.showPasswordModal = false;
+                        } else {
+                            this.showToastMsg(result.message, "error");
+                        }
+                    } catch (err) {
+                        this.showToastMsg("ไม่สามารถเชื่อมต่อระบบได้ โปรดลองอีกครั้ง", "error");
+                    }
+                    this.loadingPassword = false;
                 },
 
                 async downloadSlip() {
@@ -817,12 +861,11 @@
                     this.view = newView;
                     this.stopAutoRefresh(); 
                     
-                    // บังคับตารางรายเดือนเป็นแนวนอนเสมอ
                     if(newView === 'monthlyTable') {
                         this.printOrientation = 'landscape';
                         this.fetchMonthlyTable();
                     } else if (newView === 'report') {
-                        this.printOrientation = 'portrait'; // กลับมาเป็นแนวตั้ง
+                        this.printOrientation = 'portrait'; 
                         this.fetchCustomReport();
                     }
 
@@ -971,7 +1014,6 @@
                     this.loadingReport = false;
                 },
                 
-                // 🌟 ระบบดึงข้อมูลตารางรายเดือน 🌟
                 async fetchMonthlyTable() {
                     this.loadingReport = true;
                     try {
@@ -991,7 +1033,6 @@
                     this.loadingReport = false;
                 },
 
-                // คำนวณยอดรวมในคอลัมน์ต่างๆ
                 sumCol(key) {
                     const total = this.monthlyTableData.reduce((sum, item) => sum + (item[key] || 0), 0);
                     return total === 0 ? '' : total;
@@ -1010,5 +1051,3 @@
     </script>
 </body>
 </html>
-
-}
